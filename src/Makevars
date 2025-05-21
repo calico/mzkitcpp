@@ -9,10 +9,10 @@ CXX_STD = CXX11
 
 PKG_CPPFLAGS+= -Dlibmzkit_shared_EXPORTS -I./libmzkit -I. -pedantic -fPIC
 
-PKG_CPPFLAGS+= -I../../maven/src/maven_core/
-PKG_CPPFLAGS+= -I../../maven/src/maven_core/libmaven/
-PKG_CPPFLAGS+= -I../../maven/src/maven_core/pugixml/src
-PKG_CPPFLAGS+= -I../../maven/src/maven_core/MSToolkit/include
+PKG_CPPFLAGS+= -I./maven_core/
+PKG_CPPFLAGS+= -I./maven_core/libmaven/
+PKG_CPPFLAGS+= -I./maven_core/pugixml/src
+PKG_CPPFLAGS+= -I./maven_core/MSToolkit/include
 
 PKG_CPPFLAGS+= -D_FILE_OFFSET_BITS=64
 PKG_CPPFLAGS+= -D_LARGEFILE_SOURCE
