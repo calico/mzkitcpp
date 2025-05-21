@@ -1,3 +1,0 @@
-[submodule "src/maven_core"]
-	path = src/maven_core
-	url = https://github.com/eugenemel/maven_core
