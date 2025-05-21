@@ -21,4 +21,4 @@ Imports:
 	Rcpp,
 	BH,
 	RcppEigen
-LinkingTo: Rcpp
+LinkingTo: Rcpp, BH
