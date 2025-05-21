@@ -1,0 +1,44 @@
+CC = /usr/bin/clang
+CXX = /usr/bin/clang++
+CXX11 = /usr/bin/clang++
+CXX14 = /usr/bin/clang++
+CXX17 = /usr/bin/clang++
+CXX20 = /usr/bin/clang++
+
+CXX_STD = CXX11
+
+PKG_CPPFLAGS+= -Dlibmzkit_shared_EXPORTS -I./libmzkit -I. -pedantic -fPIC
+
+PKG_CPPFLAGS+= -I../../maven/src/maven_core/
+PKG_CPPFLAGS+= -I../../maven/src/maven_core/libmaven/
+PKG_CPPFLAGS+= -I../../maven/src/maven_core/pugixml/src
+PKG_CPPFLAGS+= -I../../maven/src/maven_core/MSToolkit/include
+
+PKG_CPPFLAGS+= -D_FILE_OFFSET_BITS=64
+PKG_CPPFLAGS+= -D_LARGEFILE_SOURCE
+PKG_CPPFLAGS+= -DGCC
+
+# Additional flags for better testing
+PKG_CXXFLAGS+= -v
+PKG_LDFLAGS+= -v
+
+PKG_LIBS= -lmzkit_all -L./libmzkit/
+
+LIBS+= -L./ -L./libmzkit
+
+# changes necessary to work with Big Sur
+PKG_LIBS+= -F/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/..
+PKG_LIBS+= -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+
+SOURCES= RcppExports.cpp Rcpp_from_raw_files.cpp Rcpp_di_utils.cpp Rcpp_di_pipeline.cpp Rcpp_msp_libraries.cpp Rcpp_rt_alignment.cpp Rcpp_maven_utils.cpp Rcpp_sec_pipeline.cpp Rcpp_mzkitchen_utils.cpp Rcpp_maldesi_pipeline.cpp Rcpp_isotopes.cpp Rcpp_qqq_qc_utils.cpp
+
+OBJECTS= $(SOURCES:.cpp=.o)
+
+OBJECTS_MAVEN_CORE = ./lib/*.o
+
+all: $(SHLIB) ./libmzkit/libmzkit_all.a
+
+$(SHLIB): $(OBJECTS) $(OBJECTS_MAVEN_CORE) ./libmzkit/libmzkit_all.a
+
+./libmzkit/libmzkit_all.a: $(OBJECTS_MAVEN_CORE)
+		ar -rvs ./libmzkit/libmzkit_all.a $(OBJECTS_MAVEN_CORE)

@@ -1,0 +1,25 @@
+Package: mzkitcpp
+Title: Functions for plotting and visualization of metabolomics data
+Version: 0.0.1
+Authors@R: c(
+    person(
+      given = "Phil",
+      family = "Seitzer",
+      email = "phillipseitzer@calicolabs.com",
+      role = c("aut", "cre")
+      ),
+    person(
+      given = "Calico Life Sciences LLC",
+      role = c("cph", "fnd")
+      )
+    )
+Maintainer: Johanna Fleischman <johanna@calicolabs.com>
+Description: Functions for plotting and visualization of metabolomics data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports: 
+	Rcpp,
+	bh
+LinkingTo: Rcpp
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
