@@ -13,13 +13,12 @@ Authors@R: c(
       role = c("cph", "fnd")
       )
     )
-Maintainer: Johanna Fleischman <johanna@calicolabs.com>
-Description: Functions for plotting and visualization of metabolomics data.
+Maintainer: Phillip Seitzer <phillipseitzer@calicolabs.com>
+Description: Fast C++ functions, including maven_core integrations
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: 
 	Rcpp,
-	BH
+	BH,
+	RcppEigen
 LinkingTo: Rcpp
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
