@@ -29,10 +29,6 @@ PKG_CPPFLAGS+= -DGCC
 PKG_CXXFLAGS+= -v
 PKG_LDFLAGS+= -v
 
-PKG_LIBS= -lmzkit_all -L./libmzkit/
-
-LIBS+= -L./ -L./libmzkit
-
 # changes necessary to work with Big Sur
 PKG_LIBS+= -F/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/..
 PKG_LIBS+= -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
