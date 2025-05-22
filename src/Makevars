@@ -9,13 +9,17 @@ CXX_STD = CXX11
 
 PKG_CPPFLAGS+= -Dlibmzkit_shared_EXPORTS -I./libmzkit -I. -pedantic -fPIC
 
-PKG_CPPFLAGS+= -I./maven_core/
-PKG_CPPFLAGS+= -I./maven_core/libmaven/
-PKG_CPPFLAGS+= -I./maven_core/pugixml/src
-PKG_CPPFLAGS+= -I./maven_core/MSToolkit/include
+MAVEN_CORE_DIR=./maven/src/maven_core/
 
-MAVEN_CORE_BUILD_DIR = ./maven_core/bin/
-MAVEN_CORE_LIB_PATH = $(MAVEN_CORE_BUILD_DIR)/libmaven.a
+LIBMAVEN_DIR= $(MAVEN_CORE_DIR)/libmaven
+PUGIXML_DIR=$(MAVEN_CORE_DIR)/pugixml/src
+MSTOOLKIT_DIR=$(MAVEN_CORE_DIR)/MSToolkit/
+MSTOOLKIT_INCLUDE_DIR=$(MSTOOLKIT_DIR)/include
+
+PKG_CPPFLAGS+= -I$(MAVEN_CORE_DIR)
+PKG_CPPFLAGS+= -I$(LIBMAVEN_DIR)
+PKG_CPPFLAGS+= -I$(PUGIXML_DIR)
+PKG_CPPFLAGS+= -I$(MSTOOLKIT_INCLUDE_DIR)
 
 PKG_CPPFLAGS+= -D_FILE_OFFSET_BITS=64
 PKG_CPPFLAGS+= -D_LARGEFILE_SOURCE
@@ -25,7 +29,7 @@ PKG_CPPFLAGS+= -DGCC
 PKG_CXXFLAGS+= -v
 PKG_LDFLAGS+= -v
 
-PKG_LIBS= -lmzkit_all -L./libmzkit/ -L$(MAVEN_CORE_BUILD_DIR) -lmaven
+PKG_LIBS= -lmzkit_all -L./libmzkit/
 
 LIBS+= -L./ -L./libmzkit
 
@@ -33,18 +37,25 @@ LIBS+= -L./ -L./libmzkit
 PKG_LIBS+= -F/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/..
 PKG_LIBS+= -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 
-SOURCES= RcppExports.cpp Rcpp_from_raw_files.cpp Rcpp_di_utils.cpp Rcpp_di_pipeline.cpp Rcpp_msp_libraries.cpp Rcpp_rt_alignment.cpp Rcpp_maven_utils.cpp Rcpp_sec_pipeline.cpp Rcpp_mzkitchen_utils.cpp Rcpp_maldesi_pipeline.cpp Rcpp_isotopes.cpp Rcpp_qqq_qc_utils.cpp
+RCPP_SOURCES=$(wildcard *.cpp)
+LIBMAVEN_SOURCES=$(wildcard $(LIBMAVEN_DIR)/*.cpp)
+
+SOURCES= $(RCPP_SOURCES) $(LIBMAVEN_SOURCES)
 
 OBJECTS= $(SOURCES:.cpp=.o)
+
+all: $(SHLIB)
+
+# Qmake appraoch follows here
 
 # Custom target to build the maven_core submodule
 # This target will be executed before the main R package shared library is linked.
 # .PHONY ensures this target is always considered, even if a file named 'maven_core_build' exists.
-.PHONY: maven_core_build
+#.PHONY: maven_core_build
 
 # The $(SHLIB) (your R package's shared library) now depends on maven_core_build
 # This ensures maven_core is built before your R package is linked.
-$(SHLIB): $(OBJECTS) $(MAVEN_CORE_LIB_PATH)
+# $(SHLIB): $(OBJECTS) $(MAVEN_CORE_LIB_PATH)
 
 # Rule to build maven_core
 # The order of commands is crucial:
@@ -55,21 +66,21 @@ $(SHLIB): $(OBJECTS) $(MAVEN_CORE_LIB_PATH)
 # The '&&' ensures commands execute sequentially and stop on error.
 # The '@' suppresses command echoing for cleaner output.
 # Use 'cd ../' to go back to the submodule root for qmake, then 'cd -' to return to build dir.
-$(MAVEN_CORE_LIB_PATH): maven_core_build
-maven_core_build:
-	@echo "Building maven_core submodule..."
-	@mkdir -p $(MAVEN_CORE_BUILD_DIR)
-	@(cd $(MAVEN_CORE_BUILD_DIR) && qmake -r ../build.pro && $(MAKE) -Bj16)
-	@echo "Finished building maven_core submodule."
+# $(MAVEN_CORE_LIB_PATH): maven_core_build
+# maven_core_build:
+#	@echo "Building maven_core submodule..."
+#	@mkdir -p $(MAVEN_CORE_BUILD_DIR)
+#	@(cd $(MAVEN_CORE_BUILD_DIR) && qmake -r ../build.pro && $(MAKE) -Bj16)
+#	@echo "Finished building maven_core submodule."
 
 # Standard 'all' target (usually not explicitly needed as R handles this)
-all: $(SHLIB)
+# all: $(SHLIB)
 
 # Clean rule: Ensure 'R CMD clean' also cleans the maven_core build artifacts.
 # This target is automatically called by R's build system when cleaning.
-clean:
-	@echo "Cleaning maven_core submodule build directory..."
-	@rm -rf $(MAVEN_CORE_BUILD_DIR)
+#clean:
+#	@echo "Cleaning maven_core submodule build directory..."
+#	@rm -rf $(MAVEN_CORE_BUILD_DIR)
 
-./libmzkit/libmzkit_all.a: $(OBJECTS_MAVEN_CORE)
-		ar -rvs ./libmzkit/libmzkit_all.a $(OBJECTS_MAVEN_CORE)
+#./libmzkit/libmzkit_all.a: $(OBJECTS_MAVEN_CORE)
+#		ar -rvs ./libmzkit/libmzkit_all.a $(OBJECTS_MAVEN_CORE)
