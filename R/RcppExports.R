@@ -101,6 +101,10 @@ maldesi_search <- function(sample_file, library, search_params, verbose = TRUE, 
     .Call(`_mzkitcpp_maldesi_search`, sample_file, library, search_params, verbose, debug)
 }
 
+maldesi_isotopic_envelope_finder <- function(sample_file, params, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_maldesi_isotopic_envelope_finder`, sample_file, params, verbose, debug)
+}
+
 maldesi_create_modified_mzML <- function(sample_file, modified_sample_file, modification_params, verbose = TRUE, debug = FALSE) {
     invisible(.Call(`_mzkitcpp_maldesi_create_modified_mzML`, sample_file, modified_sample_file, modification_params, verbose, debug))
 }
@@ -139,6 +143,10 @@ get_scan_metadata <- function(sample_file, verbose = TRUE, debug = FALSE) {
 
 get_scan_data <- function(sample_file, scan_num, verbose = TRUE, debug = FALSE) {
     .Call(`_mzkitcpp_get_scan_data`, sample_file, scan_num, verbose, debug)
+}
+
+get_background_subtracted_scan_data <- function(sample_file, target_scan_num, background_scan_num, ppm_tol, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_get_background_subtracted_scan_data`, sample_file, target_scan_num, background_scan_num, ppm_tol, verbose, debug)
 }
 
 predict_formula <- function(mz, adduct, ppm = 10.0, legal_atom_counts = NULL, debug = FALSE) {

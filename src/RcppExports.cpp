@@ -409,6 +409,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// maldesi_isotopic_envelope_finder
+DataFrame maldesi_isotopic_envelope_finder(const String& sample_file, const List& params, const bool& verbose, const bool& debug);
+RcppExport SEXP _mzkitcpp_maldesi_isotopic_envelope_finder(SEXP sample_fileSEXP, SEXP paramsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type sample_file(sample_fileSEXP);
+    Rcpp::traits::input_parameter< const List& >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(maldesi_isotopic_envelope_finder(sample_file, params, verbose, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
 // maldesi_create_modified_mzML
 void maldesi_create_modified_mzML(const String& sample_file, const String& modified_sample_file, const List& modification_params, const bool& verbose, const bool& debug);
 RcppExport SEXP _mzkitcpp_maldesi_create_modified_mzML(SEXP sample_fileSEXP, SEXP modified_sample_fileSEXP, SEXP modification_paramsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
@@ -538,6 +552,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
     rcpp_result_gen = Rcpp::wrap(get_scan_data(sample_file, scan_num, verbose, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_background_subtracted_scan_data
+DataFrame get_background_subtracted_scan_data(const String& sample_file, const int& target_scan_num, const int& background_scan_num, const double& ppm_tol, const bool& verbose, const bool& debug);
+RcppExport SEXP _mzkitcpp_get_background_subtracted_scan_data(SEXP sample_fileSEXP, SEXP target_scan_numSEXP, SEXP background_scan_numSEXP, SEXP ppm_tolSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type sample_file(sample_fileSEXP);
+    Rcpp::traits::input_parameter< const int& >::type target_scan_num(target_scan_numSEXP);
+    Rcpp::traits::input_parameter< const int& >::type background_scan_num(background_scan_numSEXP);
+    Rcpp::traits::input_parameter< const double& >::type ppm_tol(ppm_tolSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_background_subtracted_scan_data(sample_file, target_scan_num, background_scan_num, ppm_tol, verbose, debug));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -867,6 +897,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_get_last_rts", (DL_FUNC) &_mzkitcpp_get_last_rts, 3},
     {"_mzkitcpp_ISO_isotope_matrices", (DL_FUNC) &_mzkitcpp_ISO_isotope_matrices, 8},
     {"_mzkitcpp_maldesi_search", (DL_FUNC) &_mzkitcpp_maldesi_search, 5},
+    {"_mzkitcpp_maldesi_isotopic_envelope_finder", (DL_FUNC) &_mzkitcpp_maldesi_isotopic_envelope_finder, 4},
     {"_mzkitcpp_maldesi_create_modified_mzML", (DL_FUNC) &_mzkitcpp_maldesi_create_modified_mzML, 5},
     {"_mzkitcpp_smoothed_series", (DL_FUNC) &_mzkitcpp_smoothed_series, 4},
     {"_mzkitcpp_monoiosotopic_mass", (DL_FUNC) &_mzkitcpp_monoiosotopic_mass, 3},
@@ -877,6 +908,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_name_summaries", (DL_FUNC) &_mzkitcpp_name_summaries, 2},
     {"_mzkitcpp_get_scan_metadata", (DL_FUNC) &_mzkitcpp_get_scan_metadata, 3},
     {"_mzkitcpp_get_scan_data", (DL_FUNC) &_mzkitcpp_get_scan_data, 4},
+    {"_mzkitcpp_get_background_subtracted_scan_data", (DL_FUNC) &_mzkitcpp_get_background_subtracted_scan_data, 6},
     {"_mzkitcpp_predict_formula", (DL_FUNC) &_mzkitcpp_predict_formula, 5},
     {"_mzkitcpp_import_msp_lipids_library", (DL_FUNC) &_mzkitcpp_import_msp_lipids_library, 7},
     {"_mzkitcpp_export_msp_lipids_library", (DL_FUNC) &_mzkitcpp_export_msp_lipids_library, 5},
