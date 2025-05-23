@@ -19,9 +19,11 @@
 #ifndef libmzkit_shared_EXPORTS //defined in Makevars for mzkitcpp
 #include "../maven/src/maven_core/libmaven/mzSample.h"
 #include "../maven/src/maven_core/libmaven/mzMassCalculator.h"
+#include "../maven/src/maven_core/libmaven/isotopicenvelopeutils.h"
 #else
 #include "mzSample.h"
 #include "mzMassCalculator.h"
+#include "isotopicenvelopeutils.h"
 #endif
 
 using namespace Rcpp;
@@ -498,6 +500,141 @@ DataFrame maldesi_search(
   return output;
 }
 
+// [[Rcpp::export]]
+DataFrame maldesi_isotopic_envelope_finder(
+    const String& sample_file,
+    const List& params,
+    const bool& verbose=true,
+    const bool& debug=false) {
+  
+  //start timer
+  auto start = std::chrono::system_clock::now();
+  
+  mzSample *sample = new mzSample();
+  string filename = sample_file.get_cstring();
+  sample->loadSample(filename.c_str());
+  String sample_basename = Rcpp::Language("basename", sample_file).eval();
+  
+  // ---------- START PARAMETERS ----------- //
+  float isotopePpmTol = 3.0f;
+  if (params.containsElementNamed("isotopePpmTol")) {
+    isotopePpmTol = params["isotopePpmTol"];
+  }
+  
+  float intensityThreshold = 0;
+  if (params.containsElementNamed("intensityThreshold")) {
+    intensityThreshold = params["intensityThreshold"];
+  }
+  
+  int minNumIsotopes = 2;
+  if (params.containsElementNamed("minNumIsotopes")) {
+    minNumIsotopes = params["minNumIsotopes"];
+  }
+  
+  int maxNumIsotopes = 8;
+  if (params.containsElementNamed("maxNumIsotopes")) {
+    maxNumIsotopes = params["maxNumIsotopes"];
+  }
+  
+  unsigned int minCharge = 1;
+  if (params.containsElementNamed("minCharge")) {
+    minCharge = params["minCharge"];
+  }
+  
+  unsigned int maxCharge = 4;
+  if (params.containsElementNamed("maxCharge")) {
+    maxCharge = params["maxCharge"];
+  }
+  
+  int backgroundScanNum = -1;
+  if (params.containsElementNamed("backgroundScanNum")) {
+    backgroundScanNum = params["backgroundScanNum"];
+  }
+  
+  double backgroundSubtractionPpmTol = 3.0;
+  if (params.containsElementNamed("backgroundSubtractionPpmTol")) {
+    backgroundSubtractionPpmTol = params["backgroundSubtractionPpmTol"];
+  }
+  
+  // ---------- END PARAMETERS ----------- //
+  
+  Scan *baselineScan = nullptr;
+  if (backgroundScanNum > 0) {
+    baselineScan = sample->scans[(backgroundScanNum-1)]; // adjust to MAVEN indexing
+  }
+  
+  vector<int> search_scanNum{};
+  vector<int> search_envelopeIndex{};
+  vector<int> search_envelopeZ{};
+  vector<float> search_mz{};
+  vector<float> search_intensity{};
+  
+  int envelopeIndex = 0;
+  
+  for (unsigned int i = 0; i < sample->scans.size(); i++) {
+    Scan *scan = sample->scans[i];
+    int scanNum = (i+1);
+    
+    if (baselineScan) {
+      scan->subtractBackgroundScan(baselineScan, backgroundSubtractionPpmTol, debug);
+    } 
+    
+    vector<ScanIsotopicEnvelope> envelopes = ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
+      scan->mz,
+      scan->intensity,
+      isotopePpmTol, //float isotopePpmDist,
+      intensityThreshold, //float intensityThreshold,
+      minNumIsotopes, //int minNumIsotopes,
+      maxNumIsotopes, //int maxNumIsotopes,
+      minCharge, //unsigned int minCharge,
+      maxCharge, //unsigned int maxCharge,
+      debug //bool debug
+    );
+    
+    for (ScanIsotopicEnvelope& envelope : envelopes) {
+      envelopeIndex++;
+      
+      for (unsigned int i = 0; i < envelope.mz.size(); i++) {
+        search_scanNum.push_back(scanNum);
+        search_envelopeIndex.push_back(envelopeIndex);
+        search_envelopeZ.push_back(envelope.charge);
+        search_mz.push_back(envelope.mz[i]);
+        search_intensity.push_back(envelope.intensity[i]);
+      }
+    }
+    
+  }
+  
+  IntegerVector output_scanNum = wrap(search_scanNum);
+  IntegerVector output_envelopeIndex = wrap(search_envelopeIndex);
+  IntegerVector output_envelopeZ = wrap(search_envelopeZ);
+  NumericVector output_mz = wrap(search_mz);
+  NumericVector output_intensity = wrap(search_intensity);
+
+  DataFrame output = DataFrame::create(
+    
+    //Index Information
+    Named("sample") = StringVector(search_scanNum.size(), sample_basename),
+    Named("scan_num") = output_scanNum,
+    Named("envelope_index") = output_envelopeIndex,
+    Named("envelope_z") = output_envelopeZ,
+    
+    //Isotopic Envelope Contents
+    Named("mz") = output_mz,
+    Named("intensity") = output_intensity,
+
+    _["stringsAsFactors"] = false);
+  
+  
+  //print time message if verbose flag is set.
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) {
+    Rcout << "mzkitcpp::maldesi_isotopic_envelope_finder() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  }
+  
+  return output;
+}
 
 // [[Rcpp::export]]
 void maldesi_create_modified_mzML(

@@ -411,7 +411,68 @@ DataFrame get_scan_data(
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
   if (verbose) {
-    Rcout << "mzkitcpp::get_scan_metadata() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+    Rcout << "mzkitcpp::get_scan_data() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  }
+  
+  DataFrame output = DataFrame::create(
+    
+    //Scan information
+    Named("mz") = output_mz,
+    Named("intensity") = output_intensity,
+    
+    _["stringsAsFactors"] = false);
+  
+  return output; 
+}
+
+// [[Rcpp::export]]
+DataFrame get_background_subtracted_scan_data(
+    const String& sample_file,
+    const int& target_scan_num,
+    const int& background_scan_num,
+    const double& ppm_tol,
+    const bool& verbose=true,
+    const bool& debug=false) {
+  
+  //start timer
+  auto start = std::chrono::system_clock::now();
+  
+  mzSample *sample = new mzSample();
+  string filename = sample_file.get_cstring();
+  sample->loadSample(filename.c_str());
+  
+  //MAVEN scan num is actually the spectrumIndex value, which starts at 0.
+  //Assume input scan number counts from 1 instead of 0
+  int mavenTargetScanNum = target_scan_num-1;
+  int mavenBackgroundScanNum = background_scan_num-1;
+  
+  vector<float> mz{};
+  vector<float> intensity{};
+  if (mavenTargetScanNum >= 0 && mavenTargetScanNum < sample->scanCount()) {
+    Scan *scan = sample->scans[mavenTargetScanNum];
+    
+    if (mavenBackgroundScanNum >= 0 && mavenBackgroundScanNum < sample->scanCount()) {
+      Scan *backgroundScan = sample->scans[mavenBackgroundScanNum];
+      scan->subtractBackgroundScan(backgroundScan, ppm_tol, debug);
+    } else {
+      Rcout << "background scan number #" 
+            << background_scan_num 
+            << " not found - background scan subtraction not performed." 
+            << endl;
+    }
+    
+    mz = scan->mz;
+    intensity = scan->intensity;
+  }
+  
+  NumericVector output_mz = wrap(mz);
+  NumericVector output_intensity = wrap(intensity);
+  
+  //print time message if verbose flag is set.
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) {
+    Rcout << "mzkitcpp::get_background_subtracted_scan_data() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
   }
   
   DataFrame output = DataFrame::create(
