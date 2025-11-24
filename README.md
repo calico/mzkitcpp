@@ -4,5 +4,5 @@ mass spectrometry utility functions and processing algorithms written in C++, ex
 # Installation
 Execute the following command in an R console:
 ```
-remotes::install_github("calico/mzkitcpp-puglic-test", force=TRUE, build_vignettes=TRUE)
+remotes::install_github("calico/mzkitcpp-public-test", force=TRUE, build_vignettes=TRUE)
 ```
