@@ -1,2 +1,8 @@
 # mzkitcpp-public-test
-Test to create public mzkitcpp repository, stripped out of mass_spec repo
+mass spectrometry utility functions and processing algorithms written in C++, exposed in R package. Direct connection to `maven_core` C++ library.
+
+# Installation
+Execute the following command in an R console:
+```
+remotes::install_github("calico/mzkitcpp-puglic-test", force=TRUE, build_vignettes=TRUE)
+```
