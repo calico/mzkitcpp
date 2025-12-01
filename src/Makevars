@@ -7,10 +7,9 @@ CXX20 = /usr/bin/clang++
 
 CXX_STD = CXX11
 
-PKG_CPPFLAGS+= -Dlibmzkit_shared_EXPORTS -I./libmzkit -I. -pedantic -fPIC
-
-MAVEN_CORE_DIR=./maven/src/maven_core/
-
+# Define base paths using $(CURDIR) for absolute reliability from src/
+# Remove trailing slashes from variable definitions to avoid accidental double slashes
+MAVEN_CORE_BASE = $(CURDIR)/maven_core
 LIBMAVEN_DIR= $(MAVEN_CORE_DIR)/libmaven
 PUGIXML_DIR=$(MAVEN_CORE_DIR)/pugixml/src
 
@@ -20,6 +19,9 @@ MSTOOLKIT_TOP_LEVEL_SRC_DIR=$(MSTOOLKIT_DIR)/src/
 MSTOOLKIT_EXPAT_DIR=$(MSTOOLKIT_TOP_LEVEL_SRC_DIR)/expat-2.0.1
 MSTOOLKIT_INNER_SRC_DIR=$(MSTOOLKIT_TOP_LEVEL_SRC_DIR)/MSToolkit
 MSTOOLKIT_MZPARSER_DIR=$(MSTOOLKIT_TOP_LEVEL_SRC_DIR)/mzParser
+
+# PKG_CPPFLAGS: Ensure all include paths are similarly anchored or explicitly relative to $(CURDIR)
+PKG_CPPFLAGS+= -Dlibmzkit_shared_EXPORTS -I$(CURDIR)/libmzkit -I$(CURDIR) -pedantic -fPIC
 
 PKG_CPPFLAGS+= -I$(MAVEN_CORE_DIR)
 PKG_CPPFLAGS+= -I$(LIBMAVEN_DIR)
