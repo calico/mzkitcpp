@@ -10,29 +10,29 @@ CXX_STD = CXX11
 # Define base paths using $(CURDIR) for absolute reliability from src/
 # Remove trailing slashes from variable definitions to avoid accidental double slashes
 MAVEN_CORE_BASE = $(CURDIR)/maven_core
-LIBMAVEN_DIR= $(MAVEN_CORE_DIR)/libmaven
-PUGIXML_DIR=$(MAVEN_CORE_DIR)/pugixml/src
+LIBMAVEN_DIR    = $(MAVEN_CORE_BASE)/libmaven
+PUGIXML_SRC_DIR = $(MAVEN_CORE_BASE)/pugixml/src
 
-MSTOOLKIT_DIR=$(MAVEN_CORE_DIR)/MSToolkit/
-MSTOOLKIT_INCLUDE_DIR=$(MSTOOLKIT_DIR)/include
-MSTOOLKIT_TOP_LEVEL_SRC_DIR=$(MSTOOLKIT_DIR)/src/
-MSTOOLKIT_EXPAT_DIR=$(MSTOOLKIT_TOP_LEVEL_SRC_DIR)/expat-2.0.1
-MSTOOLKIT_INNER_SRC_DIR=$(MSTOOLKIT_TOP_LEVEL_SRC_DIR)/MSToolkit
-MSTOOLKIT_MZPARSER_DIR=$(MSTOOLKIT_TOP_LEVEL_SRC_DIR)/mzParser
+MSTOOLKIT_BASE          = $(MAVEN_CORE_BASE)/MSToolkit
+MSTOOLKIT_INCLUDE_DIR   = $(MSTOOLKIT_BASE)/include
+MSTOOLKIT_TOP_SRC_DIR   = $(MSTOOLKIT_BASE)/src
+MSTOOLKIT_EXPAT_DIR     = $(MSTOOLKIT_TOP_SRC_DIR)/expat-2.0.1
+MSTOOLKIT_INNER_SRC_DIR = $(MSTOOLKIT_TOP_SRC_DIR)/MSToolkit
+MSTOOLKIT_MZPARSER_DIR  = $(MSTOOLKIT_TOP_SRC_DIR)/mzParser
 
 # PKG_CPPFLAGS: Ensure all include paths are similarly anchored or explicitly relative to $(CURDIR)
 PKG_CPPFLAGS+= -Dlibmzkit_shared_EXPORTS -I$(CURDIR)/libmzkit -I$(CURDIR) -pedantic -fPIC
 
-PKG_CPPFLAGS+= -I$(MAVEN_CORE_DIR)
+PKG_CPPFLAGS+= -I$(MAVEN_CORE_BASE)
 PKG_CPPFLAGS+= -I$(LIBMAVEN_DIR)
-PKG_CPPFLAGS+= -I$(PUGIXML_DIR)
-PKG_CPPFLAGS+= -I$(MSTOOLKIT_INCLUDE_DIR)
+PKG_CPPFLAGS+= -I$(PUGIXML_SRC_DIR)
+PKG_CPPFLAGS+= -I$(MSTOOLKIT_INCLUDE_DIR) # This is correctly anchored
 
 PKG_CPPFLAGS+= -D_FILE_OFFSET_BITS=64
 PKG_CPPFLAGS+= -D_LARGEFILE_SOURCE
 PKG_CPPFLAGS+= -DGCC
 
-# Additional flags for better testing
+# Additional flags for better testing (keep -v for verbose output if still debugging)
 PKG_CXXFLAGS+= -v
 PKG_LDFLAGS+= -v
 
@@ -45,10 +45,13 @@ PKG_LIBS+= -L. -lz -lpthread -lm -ldl
 
 PKG_CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -DHAVE_EXPAT_CONFIG_H -D_NOSQLITE
 
-RCPP_SOURCES=$(wildcard *.cpp)
+# Explicitly use $(CURDIR) for wildcard searches to ensure they're anchored from src/
+RCPP_SOURCES=$(wildcard $(CURDIR)/*.cpp)
 LIBMAVEN_SOURCES=$(wildcard $(LIBMAVEN_DIR)/*.cpp)
-PUGIXML_SOURCES=$(wildcard $(PUGIXML_DIR)/*.cpp)
+PUGIXML_SOURCES=$(wildcard $(PUGIXML_SRC_DIR)/*.cpp)
 
+# Ensure every source file path is correctly constructed from its base variable
+# and matches the exact file system path.
 MSTOOLKIT_SOURCES = \
 	$(MSTOOLKIT_INNER_SRC_DIR)/MSObject.cpp \
 	$(MSTOOLKIT_INNER_SRC_DIR)/MSReader.cpp \
@@ -74,7 +77,7 @@ MSTOOLKIT_SOURCES = \
 	$(MSTOOLKIT_MZPARSER_DIR)/MSNumpress.cpp \
 	$(MSTOOLKIT_MZPARSER_DIR)/mzMLReader.cpp \
 	$(MSTOOLKIT_MZPARSER_DIR)/mzp_base64.cpp
-
+	
 SOURCES= $(PUGIXML_SOURCES) $(MSTOOLKIT_SOURCES) $(LIBMAVEN_SOURCES) $(RCPP_SOURCES)
 
 OBJECTS= $(SOURCES:.cpp=.o)
