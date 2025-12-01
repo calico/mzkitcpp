@@ -20,60 +20,18 @@
 #include "../maven/src/maven_core/libmaven/mzSample.h"
 #include "../maven/src/maven_core/libmaven/mzMassCalculator.h"
 #include "../maven/src/maven_core/libmaven/isotopicenvelopeutils.h"
+#include "../maven/src/maven_core/libmaven/maldesi.h"
 #else
 #include "mzSample.h"
 #include "mzMassCalculator.h"
 #include "isotopicenvelopeutils.h"
+#include "maldesi.h"
 #endif
 
 using namespace Rcpp;
 using namespace std;
 
-// [[Rcpp::plugins("cpp11")]]
-struct MaldesiIonList {
-  vector<double> searchMz{};
-  vector<double> minMz{};
-  vector<double> maxMz{};
-  bool isSinglePrecursorMz = false;
-};
-
-MaldesiIonList getMaldesiIonList(
-    double compoundMz,
-    vector<Adduct>& adducts,
-    bool ms1UseDaTol,
-    double ms1PpmTol,
-    double ms1DaTol
-    ){
-  
-  MaldesiIonList ionList;
-  
-  ionList.isSinglePrecursorMz = adducts.empty();
-  
-  if (adducts.empty()) {
-    // If no adducts supplied, assume that a single precursor m/z is provided (no need for manipulation)
-    ionList.searchMz.push_back(compoundMz); 
-  } else {
-    for (Adduct& adduct : adducts) {
-      double precursorMz = adduct.computeAdductMass(compoundMz);
-      ionList.searchMz.push_back(precursorMz);
-    }
-  }
-  
-  for (double mz : ionList.searchMz) {
-    double minMz, maxMz = 0;
-    if (ms1UseDaTol) {
-      minMz = mz - ms1DaTol;
-      maxMz = mz + ms1DaTol;
-    } else {
-      minMz = mz - mz*ms1PpmTol/1e6;
-      maxMz = mz + mz*ms1PpmTol/1e6;
-    }
-    ionList.minMz.push_back(minMz);
-    ionList.maxMz.push_back(maxMz);
-  }
-  
-  return ionList;
-}
+#include "Rcpp_mzkitchen_utils.h"
 
 vector<int> getScansToSearch(const string& scansToSearchStr) {
   vector<int> scans;
@@ -121,12 +79,18 @@ DataFrame maldesi_search(
   // outputs from matching
   vector<float> match_scan_best_match_mz{};
   vector<float> match_scan_best_intensity{};
+  vector<int> match_scan_best_scan_index{};
   vector<int> match_num_matches{};
   
   // Issue 1722: additional fields
   vector<string> match_ionName{};
-  vector<int> match_numIsotopes{};
   vector<double> match_adjustedTic{};
+  
+  // Issue 1841: additional fields specific to large peptide protein binding assay
+  vector<string> match_adductName{};
+  vector<string> match_isotopeCode{};
+  vector<double> match_isotopeNaturalAbundance{};
+  vector<int> match_numBound{};
 
   mzSample *sample = new mzSample();
   string filename = sample_file.get_cstring();
@@ -192,29 +156,6 @@ DataFrame maldesi_search(
   }
   
   // ---------- START PARAMETERS ----------- //
-  
-  if (search_params.containsElementNamed("binMzWidth")) {
-    shared_ptr<ScanParameters> params = shared_ptr<ScanParameters>(new ScanParameters());
-    params->binMzWidth = search_params["binMzWidth"];
-    
-    if (search_params.containsElementNamed("binIntensityAgglomerationType")) {
-      
-      string binIntensityAgglomerationTypeStr = Rcpp::as<string>(search_params["binIntensityAgglomerationType"]);
-      
-      if (binIntensityAgglomerationTypeStr == "Mean") {
-        params->binIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
-      } else if (binIntensityAgglomerationTypeStr == "Median") {
-        params->binIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
-      } else if (binIntensityAgglomerationTypeStr == "Sum") {
-        params->binIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Sum;
-      } else if (binIntensityAgglomerationTypeStr == "Max") {
-        params->binIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Max;
-      }
-    }
-    
-    sample->snapToGrid(params, debug);
-  }
-  
   bool ms1UseDaTol = true;
   if (search_params.containsElementNamed("ms1UseDaTol")) {
     ms1UseDaTol = search_params["ms1UseDaTol"];
@@ -230,19 +171,71 @@ DataFrame maldesi_search(
     ms1DaTol = search_params["ms1DaTol"];
   }
   
-  bool isotopeEnvelopeIntensity = false;
-  if (search_params.containsElementNamed("isotopeEnvelopeIntensity")) {
-    isotopeEnvelopeIntensity = search_params["isotopeEnvelopeIntensity"];
+  bool backgroundMatchToZeroIntensity = true;
+  if (search_params.containsElementNamed("backgroundMatchToZeroIntensity")) {
+    backgroundMatchToZeroIntensity = search_params["backgroundMatchToZeroIntensity"];
   }
   
-  int isotopeMaxN = 3;
-  if (search_params.containsElementNamed("isotopeMaxN")) {
-    isotopeMaxN = search_params["isotopeMaxN"];
+  //Issue 1841: Parameters added for large_peptide_protein_binding_assay
+  
+  string searchType = "maldesi_search_mzmls";
+  if (search_params.containsElementNamed("searchType")) {
+    String searchTypeRStr = search_params["searchType"];
+    searchType = string(searchTypeRStr.get_cstring());
   }
   
+  double boundLigandExactMass = 0;
+  if (search_params.containsElementNamed("boundLigandExactMass")) {
+    boundLigandExactMass = search_params["boundLigandExactMass"];
+  }
+  
+  int maxNumBoundLigand = 0;
+  if (search_params.containsElementNamed("maxNumBoundLigand") && boundLigandExactMass > 0) {
+    maxNumBoundLigand = search_params["maxNumBoundLigand"];
+  }
+  
+  double peptidePredictedIsotopeRatioThreshold = 1e-6;
+  if (search_params.containsElementNamed("peptidePredictedIsotopeRatioThreshold")) {
+    peptidePredictedIsotopeRatioThreshold = search_params["peptidePredictedIsotopeRatioThreshold"];
+  }
+  
+  //background subtraction
+  List backgroundSubtractionParams = List();
   double backgroundSubtractionPpmTol = 3.0;
-  if (search_params.containsElementNamed("backgroundSubtractionPpmTol")) {
-    backgroundSubtractionPpmTol = search_params["backgroundSubtractionPpmTol"];
+  vector<Scan*> backgroundSubtractionScans{};
+  shared_ptr<PeaksSearchParameters> backgroundParams = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
+  Fragment *backgroundFragment = nullptr;
+  
+  if (search_params.containsElementNamed("backgroundSubtraction")) {
+    
+    backgroundSubtractionParams = search_params["backgroundSubtraction"];
+    
+    backgroundSubtractionPpmTol = backgroundSubtractionParams["backgroundSubtractionPpmTol"];
+    IntegerVector scanNums = backgroundSubtractionParams["backgroundScanNums"];
+    backgroundParams = listToPeaksSearchParams(backgroundSubtractionParams, true, true, debug);
+    
+    if (backgroundSubtractionParams.containsElementNamed("backgroundMatchToZeroIntensity")) {
+      backgroundMatchToZeroIntensity = backgroundSubtractionParams["backgroundMatchToZeroIntensity"];
+    }
+    
+    if (sample) {
+      for (unsigned int i = 0; i < scanNums.length(); i++) {
+        int mavenScanNum = (scanNums[i]-1);
+        Scan *scan = sample->getScan(mavenScanNum);
+        
+        if (scan) {
+          backgroundSubtractionScans.push_back(scan);
+        }
+      }
+      
+      if (!backgroundSubtractionScans.empty()) {
+        backgroundFragment = Fragment::createFromScans(backgroundSubtractionScans, backgroundParams, debug);
+        
+        if (verbose) {
+          Rcout << "Identified, parsed, and created a background spectrum from " << backgroundSubtractionScans.size() << " background scans." << endl;
+        }
+      }
+    }
   }
   
   // ---------- END PARAMETERS ----------- //
@@ -254,11 +247,7 @@ DataFrame maldesi_search(
   if (search_params.containsElementNamed("adducts")) {
     
     StringVector adductStrings = search_params["adducts"];
-    
-    if (verbose) {
-      Rcout << "Found " << adducts.size() << " adducts." << endl;
-    }
-    
+
     for (unsigned int i = 0; i < adductStrings.size(); i++) {
       
       String adductRStr = adductStrings.at(i);
@@ -271,9 +260,12 @@ DataFrame maldesi_search(
         Rcout << "Adduct: " << adductObj.name << endl;
       }
     }
+    
+    if (verbose) {
+      Rcout << "Found " << adducts.size() << " adducts." << endl;
+    }
+    
   }
-
-  double C13_DELTA = 1.003354835336;
   
   for (unsigned int i = 0; i < sample->scans.size(); i++) {
     
@@ -313,10 +305,16 @@ DataFrame maldesi_search(
         
         // Background scan has not been performed on this scanNum - will perform background subtraction, and note adjusted TIC
         if (scanNumToBackgroundCorrectedScanTic.find(scanNum) == scanNumToBackgroundCorrectedScanTic.end()) {
-
-          Scan *backgroundScan = sample->scans[(backgroundScanNum-1)]; // MAVEN counts scan '1' as '0', offset for consistency
           
-          scan->subtractBackgroundScan(backgroundScan, backgroundSubtractionPpmTol, false); // mutates the scan every where
+          if (backgroundFragment && backgroundFragment->consensus) {
+            scan->subtractBackground(
+                backgroundFragment->consensus->mzs,
+                backgroundFragment->consensus->intensity_array,
+                backgroundSubtractionPpmTol,
+                backgroundMatchToZeroIntensity,
+                debug);
+          }
+          
           backgroundSubtractedTIC = scan->totalIntensity();
         }
 
@@ -332,74 +330,78 @@ DataFrame maldesi_search(
       
       double compoundMz = input_compound_mz[j];
   
-      MaldesiIonList maldesiIonList = getMaldesiIonList(
-        compoundMz,
-        adducts,
-        ms1UseDaTol,
-        ms1PpmTol,
-        ms1DaTol);
+      MaldesiIonList maldesiIonList;
+      
+      if (searchType == "large_peptide_protein_binding_assay") {
+        
+        if (debug) {
+          Rcout << "MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonList() args:\n";
+          Rcout << "\tpeptideSequence: " << compound_name_str << endl;
+          
+          Rcout << "\tadducts:";
+          for (unsigned int i = 0; i < adducts.size(); i++) {
+            if (i > 0) {
+              Rcout << ", ";
+            }
+            Rcout << adducts.at(i).name;
+          }
+          Rcout << endl;
+          
+          Rcout << "\tboundLigandExactMass: " << boundLigandExactMass << endl;
+          Rcout << "\tmaxNumBoundLigand: " << maxNumBoundLigand << endl;
+          Rcout << "\tpeptidePredictedIsotopeRatioThreshold: " << peptidePredictedIsotopeRatioThreshold << endl;
+          Rcout << "\tms1UseDaTol: " << ms1UseDaTol << endl;
+          Rcout << "\tms1PpmTol: " << ms1PpmTol << endl;
+          Rcout << "\tms1DaTol: " << ms1DaTol << endl;
+        }
+        
+        maldesiIonList = MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonList(
+          compound_name_str, // expect this to be a properly formatted peptide sequence
+          adducts,
+          boundLigandExactMass,
+          maxNumBoundLigand,
+          peptidePredictedIsotopeRatioThreshold,
+          ms1UseDaTol,
+          ms1PpmTol,
+          ms1DaTol,
+          debug);
+        
+      } else {
+        maldesiIonList = MaldesiIonListGenerator::getMaldesiIonList(
+          compoundMz,
+          adducts,
+          ms1UseDaTol,
+          ms1PpmTol,
+          ms1DaTol,
+          debug);
+      }
       
       for (unsigned int ion = 0; ion < maldesiIonList.searchMz.size(); ion++) {
         
         double min_mz = maldesiIonList.minMz[ion];
         double max_mz = maldesiIonList.maxMz[ion];
         double compound_mz = maldesiIonList.searchMz[ion];
+        string ionName = maldesiIonList.ionName[ion];
+        int chg = maldesiIonList.chg[ion];
         
         vector<int> matches = scan->findMatchingMzs(min_mz, max_mz);
-        
-        string ionName = "";
-        int chg = 1;
-        if (!maldesiIonList.isSinglePrecursorMz) {
-          ionName = adducts.at(ion).name;
-          chg = abs(adducts.at(ion).charge);
-        }
         
         if (!matches.empty()) {
           
           float highestIntensity = -1.0f;
           float highestIntensityMz = -1.0f;
+          int highestIntensityScanIndex = -1;
           
           for (unsigned int k = 0; k < matches.size(); k++) {
             if (scan->intensity[matches[k]] > highestIntensity) {
               highestIntensity = scan->intensity[matches[k]];
               highestIntensityMz = scan->mz[matches[k]];
-            }
-          }
-          
-          int numIsotopes = 0;
-          if (isotopeEnvelopeIntensity) {
-            
-            while (true) {
-              
-              double min_isotopeMz = min_mz + ((numIsotopes+1) * C13_DELTA)/chg;
-              double max_isotopeMax = max_mz + ((numIsotopes+1) * C13_DELTA)/chg;
-              
-              vector<int> isotopeMatches = scan->findMatchingMzs(min_isotopeMz, max_isotopeMax);
-              
-              float isotopeIntensity = -1.0f;
-              for (unsigned int k = 0; k < isotopeMatches.size(); k++) {
-                if (scan->intensity[isotopeMatches[k]] > isotopeIntensity) {
-                  isotopeIntensity = scan->intensity[isotopeMatches[k]];
-                }
-              }
-              
-              if (isotopeIntensity > 0) {
-                numIsotopes++;
-                highestIntensity += isotopeIntensity;
-              } else {
-                break;
-              }
-              
-              if (numIsotopes >= isotopeMaxN) {
-                break;
-              }
-              
+              highestIntensityScanIndex = matches[k];
             }
           }
           
           match_compound_name.push_back(compound_name_str);
           match_compound_mz.push_back(compound_mz);
-          match_numIsotopes.push_back(numIsotopes);
           
           match_scan_num.push_back(scanNum);
           
@@ -422,8 +424,18 @@ DataFrame maldesi_search(
           
           match_scan_best_match_mz.push_back(highestIntensityMz);
           match_scan_best_intensity.push_back(highestIntensity);
+          match_scan_best_scan_index.push_back(highestIntensityScanIndex);
           match_num_matches.push_back(matches.size());
           
+          if (searchType == "large_peptide_protein_binding_assay") {
+            
+            // Issue 1841: additional fields specific to large peptide protein binding assay
+            match_adductName.push_back(maldesiIonList.adductName[ion]);
+            match_isotopeCode.push_back(maldesiIonList.isotopeCode[ion]);
+            match_isotopeNaturalAbundance.push_back(maldesiIonList.isotopeNaturalAbundance[ion]);
+            match_numBound.push_back(maldesiIonList.numBound[ion]);
+            
+          }
           
           double adjustedTic = tic;
           if (scanNumToBackgroundCorrectedScanTic.find(scanNum) != scanNumToBackgroundCorrectedScanTic.end()) {
@@ -456,12 +468,18 @@ DataFrame maldesi_search(
   StringVector output_compound_name = wrap(match_compound_name);
   NumericVector output_compound_mz = wrap(match_compound_mz);
   StringVector output_ionName = wrap(match_ionName);
-  NumericVector output_numIsotopes = wrap(match_numIsotopes);
   
   //match information
   NumericVector output_scan_best_match_mz = wrap(match_scan_best_match_mz);
   NumericVector output_scan_best_match_intensity = wrap(match_scan_best_intensity);
+  IntegerVector output_scan_best_scan_index = wrap(match_scan_best_scan_index);
   IntegerVector output_num_matches = wrap(match_num_matches);
+  
+  //Large Peptide Protein Binding Assay-only
+  StringVector output_adductName = wrap(match_adductName);
+  StringVector output_isotopeCode = wrap(match_isotopeCode);
+  NumericVector output_isotopeNaturalAbundance = wrap(match_isotopeNaturalAbundance);
+  IntegerVector output_numBound = wrap(match_numBound);
 
   //print time message if verbose flag is set.
   auto end = std::chrono::system_clock::now();
@@ -471,7 +489,7 @@ DataFrame maldesi_search(
   }
   
   DataFrame output = DataFrame::create(
-    //Scan information
+    //Scan information (11)
     Named("sample") = StringVector(N, sample_basename),
     Named("scan_num") = output_scan_num,
     Named("polarity") = output_polarity,
@@ -484,18 +502,35 @@ DataFrame maldesi_search(
     Named("peaksCount") = output_peaksCount,
     Named("injectionTime") = output_injectionTime,
     
-    //library entry information
+    //library entry information (3)
     Named("compoundAdduct") = output_compound_name,
     Named("theoreticalMz") = output_compound_mz,
     Named("ionName") = output_ionName,
     
-    //match information
+    //match information (4)
     Named("scan_best_match_mz") = output_scan_best_match_mz,
     Named("scan_best_match_intensity") = output_scan_best_match_intensity,
-    Named("match_num_isotopes") = output_numIsotopes,
+    Named("scan_best_match_scanIndex") = output_scan_best_scan_index,
     Named("num_matches") = output_num_matches,
     
     _["stringsAsFactors"] = false);
+  
+  if (searchType == "large_peptide_protein_binding_assay") {
+    DataFrame proteinBindingAssayOutputs = DataFrame::create(
+      
+      Named("adduct") = output_adductName,
+      Named("isotope") = output_isotopeCode,
+      Named("natural_abundance") = output_isotopeNaturalAbundance,
+      Named("num_ligand") = output_numBound,
+      
+      _["stringsAsFactors"] = false);
+    
+    output = Rcpp::Language("cbind", output, proteinBindingAssayOutputs).eval();
+  }
+  
+  //clean up
+  if (backgroundFragment) delete(backgroundFragment);
+  if (sample) delete(sample);
   
   return output;
 }
@@ -546,28 +581,73 @@ DataFrame maldesi_isotopic_envelope_finder(
     maxCharge = params["maxCharge"];
   }
   
-  int backgroundScanNum = -1;
-  if (params.containsElementNamed("backgroundScanNum")) {
-    backgroundScanNum = params["backgroundScanNum"];
+  float minIsotopeIntensityRatioLowerMzToHigherMz = 0.2;
+  if (params.containsElementNamed("minIsotopeIntensityRatioLowerMzToHigherMz")) {
+    minIsotopeIntensityRatioLowerMzToHigherMz = params["minIsotopeIntensityRatioLowerMzToHigherMz"];
   }
   
+  float maxIsotopeIntensityRatioLowerMzToHigherMz = 0.2;
+  if (params.containsElementNamed("maxIsotopeIntensityRatioLowerMzToHigherMz")) {
+    maxIsotopeIntensityRatioLowerMzToHigherMz = params["maxIsotopeIntensityRatioLowerMzToHigherMz"];
+  }
+  
+  bool backgroundMatchToZeroIntensity = true;
+  if (params.containsElementNamed("backgroundMatchToZeroIntensity")) {
+    backgroundMatchToZeroIntensity = params["backgroundMatchToZeroIntensity"];
+  }
+  
+  //background subtraction
+  List backgroundSubtractionParams = List();
   double backgroundSubtractionPpmTol = 3.0;
-  if (params.containsElementNamed("backgroundSubtractionPpmTol")) {
-    backgroundSubtractionPpmTol = params["backgroundSubtractionPpmTol"];
+  vector<Scan*> backgroundSubtractionScans{};
+  shared_ptr<PeaksSearchParameters> backgroundParams = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
+  Fragment *backgroundFragment = nullptr;
+  
+  if (params.containsElementNamed("backgroundSubtraction")) {
+    
+    backgroundSubtractionParams = params["backgroundSubtraction"];
+    
+    backgroundSubtractionPpmTol = backgroundSubtractionParams["backgroundSubtractionPpmTol"];
+    IntegerVector scanNums = backgroundSubtractionParams["backgroundScanNums"];
+    
+    if (backgroundSubtractionParams.containsElementNamed("backgroundMatchToZeroIntensity")) {
+      backgroundMatchToZeroIntensity = backgroundSubtractionParams["backgroundMatchToZeroIntensity"];
+    }
+      
+    backgroundParams = listToPeaksSearchParams(backgroundSubtractionParams, true, true, debug);
+      
+    if (sample) {
+      for (unsigned int i = 0; i < scanNums.length(); i++) {
+        int mavenScanNum = (scanNums[i]-1);
+        Scan *scan = sample->getScan(mavenScanNum);
+        
+        if (scan) {
+          backgroundSubtractionScans.push_back(scan);
+        }
+      }
+      
+      if (!backgroundSubtractionScans.empty()) {
+        backgroundFragment = Fragment::createFromScans(backgroundSubtractionScans, backgroundParams, debug);
+        
+        if (verbose) {
+          Rcout << "Identified, parsed, and created a background spectrum from " << backgroundSubtractionScans.size() << " background scans." << endl;
+        }
+      }
+    }
   }
   
   // ---------- END PARAMETERS ----------- //
   
-  Scan *baselineScan = nullptr;
-  if (backgroundScanNum > 0) {
-    baselineScan = sample->scans[(backgroundScanNum-1)]; // adjust to MAVEN indexing
-  }
-  
   vector<int> search_scanNum{};
   vector<int> search_envelopeIndex{};
   vector<int> search_envelopeZ{};
+  vector<string> search_isotopeName{};
   vector<float> search_mz{};
   vector<float> search_intensity{};
+  vector<float> search_envelopeIntensity{};
+  vector<float> search_envelopeTIC{};
+  vector<int> search_envelopeNumIsotopes{};
+  vector<int> search_envelopeScanIndex{};
   
   int envelopeIndex = 0;
   
@@ -575,9 +655,14 @@ DataFrame maldesi_isotopic_envelope_finder(
     Scan *scan = sample->scans[i];
     int scanNum = (i+1);
     
-    if (baselineScan) {
-      scan->subtractBackgroundScan(baselineScan, backgroundSubtractionPpmTol, debug);
-    } 
+    if (backgroundFragment && backgroundFragment->consensus) {
+      scan->subtractBackground(
+          backgroundFragment->consensus->mzs,
+          backgroundFragment->consensus->intensity_array,
+          backgroundSubtractionPpmTol,
+          backgroundMatchToZeroIntensity,
+          debug);
+    }
     
     vector<ScanIsotopicEnvelope> envelopes = ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
       scan->mz,
@@ -588,20 +673,38 @@ DataFrame maldesi_isotopic_envelope_finder(
       maxNumIsotopes, //int maxNumIsotopes,
       minCharge, //unsigned int minCharge,
       maxCharge, //unsigned int maxCharge,
+      minIsotopeIntensityRatioLowerMzToHigherMz, // float minIsotopeIntensityRatioLowerMzToHigherMz,
+      maxIsotopeIntensityRatioLowerMzToHigherMz, // float maxIsotopeIntensityRatioLowerMzToHigherMz,
       debug //bool debug
     );
     
+    float envelopeTIC = 0;
+    
+    unsigned long scanIsotopeCounter = 0;
     for (ScanIsotopicEnvelope& envelope : envelopes) {
-      envelopeIndex++;
       
-      for (unsigned int i = 0; i < envelope.mz.size(); i++) {
+      envelopeIndex++;
+      float envelopeIntensity = envelope.getTotalIntensity();
+      envelopeTIC += envelopeIntensity;
+      
+      int envelopeNumIsotopes = envelope.mz.size();
+      
+      for (unsigned int i = 0; i < envelopeNumIsotopes; i++) {
+        scanIsotopeCounter++;
+        string isotopeName = "[M+" + to_string(i) + "]";
         search_scanNum.push_back(scanNum);
         search_envelopeIndex.push_back(envelopeIndex);
         search_envelopeZ.push_back(envelope.charge);
+        search_isotopeName.push_back(isotopeName);
         search_mz.push_back(envelope.mz[i]);
         search_intensity.push_back(envelope.intensity[i]);
+        search_envelopeIntensity.push_back(envelopeIntensity);
+        search_envelopeNumIsotopes.push_back(envelopeNumIsotopes);
+        search_envelopeScanIndex.push_back(envelope.scanCoordinates[i]);
       }
     }
+    
+    search_envelopeTIC.insert(search_envelopeTIC.end(), scanIsotopeCounter, envelopeTIC);
     
   }
   
@@ -610,18 +713,32 @@ DataFrame maldesi_isotopic_envelope_finder(
   IntegerVector output_envelopeZ = wrap(search_envelopeZ);
   NumericVector output_mz = wrap(search_mz);
   NumericVector output_intensity = wrap(search_intensity);
+  StringVector output_isotopeName = wrap(search_isotopeName);
+  NumericVector output_envelopeIntensity = wrap(search_envelopeIntensity);
+  NumericVector output_envelopeTIC = wrap(search_envelopeTIC);
+  IntegerVector output_envelopeNumIsotopes = wrap(search_envelopeNumIsotopes);
+  IntegerVector output_scanIndex = wrap(search_envelopeScanIndex);
 
   DataFrame output = DataFrame::create(
     
-    //Index Information
+    //Sample Level
     Named("sample") = StringVector(search_scanNum.size(), sample_basename),
+    
+    //Scan Level
     Named("scan_num") = output_scanNum,
+    Named("envelopeBasedTIC") = output_envelopeTIC,
+    
+    //Isotopic Envelope Level
     Named("envelope_index") = output_envelopeIndex,
     Named("envelope_z") = output_envelopeZ,
+    Named("envelopeIntensity") = output_envelopeIntensity,
+    Named("envelopeNumIsotopes") = output_envelopeNumIsotopes,
     
-    //Isotopic Envelope Contents
+    //Isotopic Envelope Contents Level
+    Named("isotopeName") = output_isotopeName,
     Named("mz") = output_mz,
     Named("intensity") = output_intensity,
+    Named("scanIndex") = output_scanIndex,
 
     _["stringsAsFactors"] = false);
   
@@ -632,6 +749,10 @@ DataFrame maldesi_isotopic_envelope_finder(
   if (verbose) {
     Rcout << "mzkitcpp::maldesi_isotopic_envelope_finder() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
   }
+  
+  //clean up
+  if (backgroundFragment) delete(backgroundFragment);
+  if (sample) delete(sample);
   
   return output;
 }

@@ -492,7 +492,9 @@ int export_msp_lipids_library(const String& mspLibraryPath,
         if (rt > 0) {
           outputMspFileStream << "RT: " << rt << "\n";
         }
-        if (rtMin >= 0 && rtMax >= 0) {
+        
+        // Issue 1769: RT_MIN and RT_MAX values must surround rt value
+        if (rt > 0 && rtMin >= 0 && rtMax >= 0 && rtMin <= rt && rtMax >= rt) {
           outputMspFileStream 
             << "RT_min: " << rtMin << "\n"
             << "RT_max: " << rtMax << "\n";
@@ -1606,7 +1608,7 @@ void record_set_to_msp_library(const String& mspLibraryPath,
   StringVector kegg_id = StringVector(metabolite_data.nrows(), "");
   StringVector metlin_id = StringVector(metabolite_data.nrows(), "");
   StringVector inchi_key = StringVector(metabolite_data.nrows(), "");
-  IntegerVector compound_id = IntegerVector(metabolite_data.nrows(), NA_INTEGER);
+  StringVector compound_id = StringVector(metabolite_data.nrows(), "");
   StringVector record_id_str = StringVector(metabolite_data.nrows(), "");
   
   //Other library entry information
@@ -1616,6 +1618,8 @@ void record_set_to_msp_library(const String& mspLibraryPath,
   NumericVector exact_mass = NumericVector(metabolite_data.nrows(), NA_REAL);
   StringVector method = StringVector(metabolite_data.nrows(), "");
   NumericVector retention_time = NumericVector(metabolite_data.nrows(), NA_REAL);
+  NumericVector rt_min = NumericVector(metabolite_data.nrows(), NA_REAL);
+  NumericVector rt_max = NumericVector(metabolite_data.nrows(), NA_REAL);
   
   //Lipid-specific information
   StringVector lipid_class = StringVector(metabolite_data.nrows(), "");
@@ -1702,6 +1706,18 @@ void record_set_to_msp_library(const String& mspLibraryPath,
     retention_time = metabolite_data["retention_time"];
   }
   
+  if (metabolite_data.containsElementNamed("rt")) {
+    retention_time = metabolite_data["rt"];
+  }
+  
+  if (metabolite_data.containsElementNamed("rt_min")) {
+    rt_min = metabolite_data["rt_min"];
+  }
+  
+  if (metabolite_data.containsElementNamed("rt_max")) {
+    rt_max = metabolite_data["rt_max"];
+  }
+  
   //Lipid-specific information
   if (metabolite_data.containsElementNamed("lipidClass")) {
     lipid_class = metabolite_data["lipidClass"];
@@ -1770,10 +1786,8 @@ void record_set_to_msp_library(const String& mspLibraryPath,
     String inchikey_RString = inchi_key[i];
     string inchikey_val = string(inchikey_RString.get_cstring());
 
-    string calico_compound_id_val = "";
-    if (!IntegerVector::is_na(compound_id[i])) {
-      calico_compound_id_val = to_string(compound_id[i]);
-    }
+    String calico_compound_id_RString = compound_id[i];
+    string calico_compound_id_val = string(calico_compound_id_RString.get_cstring());
 
     String record_id_str_RString = record_id_str[i];
     string record_id_str_val = string(record_id_str_RString.get_cstring());
@@ -1793,6 +1807,8 @@ void record_set_to_msp_library(const String& mspLibraryPath,
 
     double exact_mass_val = exact_mass[i];
     double rt_val = retention_time[i];
+    double rt_min_val = rt_min[i];
+    double rt_max_val = rt_max[i];
     
     string compound_id_val = compound_name_val + " " + adduct_val;
     
@@ -1880,8 +1896,16 @@ void record_set_to_msp_library(const String& mspLibraryPath,
         outputMspFileStream << "SumChainLengths: " << lipid_sum_chain_lengths_val << "\n";
       }
       
-      if (!R_IsNA(rt_val) && rt_val > 0) {
+      if (!R_IsNA(rt_val) && rt_val >= 0) {
         outputMspFileStream << "RT: " << rt_val << "\n";
+      }
+      
+      if (!R_IsNA(rt_min_val) && rt_min_val >= 0) {
+        outputMspFileStream << "RT_min: " << rt_min_val << "\n";
+      }
+      
+      if (!R_IsNA(rt_max_val) && rt_max_val >= 0) {
+        outputMspFileStream << "RT_max: " << rt_max_val << "\n";
       }
       
       if (debug) {

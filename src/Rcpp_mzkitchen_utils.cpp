@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <chrono>
+#include <algorithm>
 
 #ifndef libmzkit_shared_EXPORTS //defined in Makevars for mzkitcpp
 #include "../maven/src/maven_core/libmaven/mzSample.h"
@@ -240,6 +241,100 @@ shared_ptr<PeakPickingAndGroupingParameters> listToPeakPickingAndGroupingParamet
   }
 
   return peakPickingAndGroupingParams;
+}
+
+/**
+ * @brief
+ *    Given various parameter values, return a shared_ptr<PeaksSearchParameters>.
+ *    Not an exported function.
+ *    
+ *    If the 'isUseSimpleDefaultValues' flag is true, 
+ *    defaults match intuition, e.g. several filtering settings are disabled.
+ *    
+ *    If the 'isApplyToMS1Scan' flag is true
+ *    adjust some parameter values appropriately to avoid accidental filtering,
+ *    issues that can arise from assuming MS2 structure vs MS1 (e.g., precursor m/z is always 0
+ *    for MS1 scans). This adjustment happens regardless of what the other parameters are inthe
+ *    input search_params list. These adjustments are designed to be used upstream
+ *    of any formation of a consensus spectrum (via Fragment() constuctor and Fragment::buildConsensus() calls).
+ */
+shared_ptr<PeaksSearchParameters> listToPeaksSearchParams(
+    const List& search_params,
+    bool isUseSimpleDefaultValues=true, //otherwise, uses MAVEN defaults
+    bool isApplyToMS1Scan=true, // skip steps that are only appropriate for MS2 scans
+    bool debug=false) {
+  
+  shared_ptr<PeaksSearchParameters> params = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
+  
+  //Background Params gets a different set of defaults
+  if (isUseSimpleDefaultValues) {
+    params->scanFilterMinFracIntensity = -1;
+    params->scanFilterMinSNRatio = -1;
+    params->scanFilterMaxNumberOfFragments = -1;
+    params->scanFilterBaseLinePercentile = -1;
+    params->scanFilterIsRetainFragmentsAbovePrecursorMz = true;
+    
+    params->consensusIsNormalizeTo10K = false;
+    params->consensusIsIntensityAvgByObserved = true;
+    params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+  }
+  
+  //scan filter params (all ms levels)
+  if (search_params.containsElementNamed("scanFilterMinFracIntensity")) params->scanFilterMinFracIntensity = search_params["scanFilterMinFracIntensity"];
+  if (search_params.containsElementNamed("scanFilterMinSNRatio")) params->scanFilterMinSNRatio = search_params["scanFilterMinSNRatio"];
+  if (search_params.containsElementNamed("scanFilterMaxNumberOfFragments")) params->scanFilterMaxNumberOfFragments = search_params["scanFilterMaxNumberOfFragments"];
+  if (search_params.containsElementNamed("scanFilterBaseLinePercentile")) params->scanFilterBaseLinePercentile = search_params["scanFilterBaseLinePercentile"];
+  if (search_params.containsElementNamed("scanFilterIsRetainFragmentsAbovePrecursorMz")) params->scanFilterIsRetainFragmentsAbovePrecursorMz = search_params["scanFilterIsRetainFragmentsAbovePrecursorMz"];
+  if (search_params.containsElementNamed("scanFilterPrecursorPurityPpm")) params->scanFilterPrecursorPurityPpm = search_params["scanFilterPrecursorPurityPpm"];
+  if (search_params.containsElementNamed("scanFilterMinIntensity")) params->scanFilterMinIntensity = search_params["scanFilterMinIntensity"];
+  
+  //scan filter for MS1 scans
+  if (search_params.containsElementNamed("scanFilterMs1MinRt")) params->scanFilterMs1MinRt = search_params["scanFilterMs1MinRt"];
+  if (search_params.containsElementNamed("scanFilterMs1MaxRt")) params->scanFilterMs1MaxRt = search_params["scanFilterMs1MaxRt"];
+  
+  //scan filter for MS2 scans
+  if (search_params.containsElementNamed("scanFilterMs2MinRt")) params->scanFilterMs2MinRt = search_params["scanFilterMs2MinRt"];
+  if (search_params.containsElementNamed("scanFilterMs2MaxRt")) params->scanFilterMs2MaxRt = search_params["scanFilterMs2MaxRt"];
+  
+  //consensus spectrum params (all ms levels)
+  if (search_params.containsElementNamed("consensusIsIntensityAvgByObserved")) params->consensusIsIntensityAvgByObserved = search_params["consensusIsIntensityAvgByObserved"];
+  if (search_params.containsElementNamed("consensusIsNormalizeTo10K")) params->consensusIsNormalizeTo10K = search_params["consensusIsNormalizeTo10K"];
+  if (search_params.containsElementNamed("consensusIntensityAgglomerationType")){
+    
+    String consensusIntensityAgglomerationTypeRString = search_params["consensusIntensityAgglomerationType"];
+    string consensusIntensityAgglomerationTypeStr = string(consensusIntensityAgglomerationTypeRString.get_cstring());
+    
+    transform(consensusIntensityAgglomerationTypeStr.begin(), consensusIntensityAgglomerationTypeStr.end(), consensusIntensityAgglomerationTypeStr.begin(), ::toupper);
+    
+    if (consensusIntensityAgglomerationTypeStr == "MEAN") {
+      params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+    } else if (consensusIntensityAgglomerationTypeStr == "MEDIAN") {
+      params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+    } else if (consensusIntensityAgglomerationTypeStr == "SUM") {
+      params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Sum;
+    } else if (consensusIntensityAgglomerationTypeStr == "MAX") {
+      params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Max;
+    }
+  }
+  
+  //consensus spectrum formation of MS1 scans
+  if (search_params.containsElementNamed("consensusMs1PpmTolr")) params->consensusMs1PpmTolr = search_params["consensusMs1PpmTolr"];
+  if (search_params.containsElementNamed("consensusMinNumMs1Scans")) params->consensusMinNumMs1Scans = search_params["consensusMinNumMs1Scans"];
+  if (search_params.containsElementNamed("consensusMinFractionMs1Scans")) params->consensusMinFractionMs1Scans = search_params["consensusMinFractionMs1Scans"];
+  
+  //consensus spectrum formation of MS2 scans
+  if (search_params.containsElementNamed("consensusPpmTolr")) params->consensusPpmTolr = search_params["consensusPpmTolr"];
+  if (search_params.containsElementNamed("consensusMinNumMs2Scans")) params->consensusMinNumMs2Scans = search_params["consensusMinNumMs2Scans"];
+  if (search_params.containsElementNamed("consensusMinFractionMs2Scans")) params->consensusMinFractionMs2Scans = search_params["consensusMinFractionMs2Scans"];
+  if (search_params.containsElementNamed("consensusIsRetainOriginalScanIntensities")) params->consensusIsRetainOriginalScanIntensities = search_params["consensusIsRetainOriginalScanIntensities"];
+
+  // Strict adjustments necessary for MS1 scan work (regardless of parameter values or defaults)
+  if (isApplyToMS1Scan) {
+    params->scanFilterIsRetainFragmentsAbovePrecursorMz = true; // for MS1 scan, 'precursor' mz is 0 - avoid filtering out peaks
+    params->scanFilterPrecursorPurityPpm = -1; // This purity number has no meaning for MS1 scans
+  }
+  
+  return params;  
 }
 
 /**

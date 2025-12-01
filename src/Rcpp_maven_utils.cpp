@@ -18,7 +18,17 @@
 using namespace Rcpp;
 using namespace std;
 
+#include "Rcpp_mzkitchen_utils.h"
+
 // [[Rcpp::plugins("cpp11")]]
+
+// Function Declarations
+DataFrame _generate_consensus_spectrum(
+    const pair<vector<mzSample*>, vector<Scan*>> inputs,
+    const List& params,
+    const bool& verbose=true,
+    const bool& debug=false
+);
 
 /**
  * @brief
@@ -201,6 +211,63 @@ double exact_mass(const String& formula, bool verbose=false) {
 
 /**
  * @brief
+ *    Given a peptide sequence, return the exact mass.
+ */
+// [[Rcpp::export]]
+double exact_mass_peptide(const String& peptideSequence, bool verbose=false) {
+  auto start = std::chrono::system_clock::now();
+  
+  string peptideSequenceString = string(peptideSequence.get_cstring());
+  double peptideExactMass = MassCalculator::computePeptideNeutralMass(peptideSequenceString);
+  
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) Rcout << "mzkitcpp::exact_mass_peptide() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  
+  return peptideExactMass;
+}
+
+/**
+ * @brief
+ *    Given a peptide sequence, return the exact mass.
+ */
+// [[Rcpp::export]]
+DataFrame envelope_dist_peptide(const String& peptideSequence, double threshold=1e-6, bool debug=false) {
+  
+  string peptideSequenceString = string(peptideSequence.get_cstring());
+  
+  map<int, double> peptideIsotopeDist = MassCalculator::peptideC13Distribution(
+    peptideSequenceString,
+    0.0107, // natural abundance of C13
+    threshold,
+    debug);
+  
+  vector<int> numC13(peptideIsotopeDist.size());
+  vector<double> probIsotope(peptideIsotopeDist.size());
+  
+  unsigned int i = 0;
+  for (auto it = peptideIsotopeDist.begin(); it != peptideIsotopeDist.end(); ++it) {
+    numC13[i] = it->first;
+    probIsotope[i] = it->second;
+    i++;
+  }
+  
+  IntegerVector output_numC13 = wrap(numC13);
+  NumericVector output_probIsotope = wrap(probIsotope);
+  
+  DataFrame output = DataFrame::create(
+    
+    //Scan information
+    Named("isotope_number") = output_numC13,
+    Named("probability") = output_probIsotope,
+    
+    _["stringsAsFactors"] = false);
+  
+  return output; 
+}
+
+/**
+ * @brief
  *    Given an exact mass and an adduct name, return the precursor m/z.
  */
 // [[Rcpp::export]]
@@ -240,6 +307,30 @@ double adductize_formula(const String& formula, const String& adduct, bool verbo
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
   if (verbose) Rcout << "mzkitcpp::adductize_formula() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  
+  return precursorMz;
+}
+
+/**
+ * @brief
+ *    Given a peptide sequence and an adduct name, return the precursor m/z.
+ */
+// [[Rcpp::export]]
+double adductize_peptide(const String& peptideSequence, const String& adduct, bool verbose=false) {
+  
+  auto start = std::chrono::system_clock::now();
+  
+  string peptideSequenceString = string(peptideSequence.get_cstring());
+  double formulaMass = MassCalculator::computePeptideNeutralMass(peptideSequenceString);
+  
+  string adductString = string(adduct.get_cstring());
+  Adduct adductObj = MassCalculator::parseAdductFromName(adductString);
+  
+  double precursorMz = adductObj.computeAdductMass(formulaMass);
+  
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) Rcout << "mzkitcpp::adductize_peptide() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
   
   return precursorMz;
 }
@@ -426,11 +517,165 @@ DataFrame get_scan_data(
 }
 
 // [[Rcpp::export]]
+DataFrame get_consensus_spectrum(
+  const String& sample_file,
+  const IntegerVector& scan_nums,
+  const List& params,
+  const bool& verbose=true,
+  const bool& debug=false
+) {
+  
+  //start timer
+  auto start = std::chrono::system_clock::now();
+  
+  // load sample
+  mzSample *sample = new mzSample();
+  string filename = sample_file.get_cstring();
+
+  //pull out scans, route to fragments
+  vector<Scan*> sampleScans{};
+  vector<mzSample*> sampleVector{};
+  
+  if (sample) {
+    
+    sample->loadSample(filename.c_str());
+    sampleVector.push_back(sample);
+    
+    for (int scanNum : scan_nums) {
+      int mavenScanNum = scanNum-1;
+      sampleScans.push_back(sample->getScan(mavenScanNum));
+    }
+  }
+  
+  pair<vector<mzSample*>, vector<Scan*>> inputs = make_pair(sampleVector, sampleScans);
+  
+  DataFrame output = _generate_consensus_spectrum(inputs, params, verbose, debug);
+  
+  //print time message if verbose flag is set.
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) {
+    Rcout << "mzkitcpp::get_consensus_spectrum() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  }
+  
+  return output;
+}
+
+// [[Rcpp::export]]
+DataFrame get_multi_file_consensus_spectrum(
+    const DataFrame& scans_table,
+    const List& params,
+    const bool& verbose=true,
+    const bool& debug=false
+) {
+  
+  //start timer
+  auto start = std::chrono::system_clock::now();
+  
+  map<string, mzSample*> sampleMap = map<string, mzSample*>{};
+  
+  //pull out scans, route to fragments
+  vector<Scan*> sampleScans{};
+  vector<mzSample*> sampleVector{};
+  
+  if (scans_table.containsElementNamed("sample") && scans_table.containsElementNamed("scan")) {
+    StringVector sampleNameVector = scans_table["sample"];
+    IntegerVector scanVector = scans_table["scan"];
+    
+    for (unsigned int i = 0; i < sampleNameVector.size(); i++) {
+      String sampleNameRStr = sampleNameVector[i];
+      string sampleName = sampleNameRStr.get_cstring();
+       
+      if (sampleMap.find(sampleName) == sampleMap.end()) {
+        mzSample *sample = new mzSample();
+        sample->loadSample(sampleName.c_str());
+        sampleMap.insert(make_pair(sampleName, sample));
+        sampleVector.push_back(sample);
+      }
+
+      mzSample *sample = sampleMap.at(sampleName);
+
+      int scanNum = scanVector[i];
+      int mavenScanNum = scanNum-1;
+
+      sampleScans.push_back(sample->getScan(mavenScanNum));
+    }
+  }
+  
+  pair<vector<mzSample*>, vector<Scan*>> inputs = make_pair(sampleVector, sampleScans);
+  
+  DataFrame output = _generate_consensus_spectrum(inputs, params, verbose, debug);
+  
+  //print time message if verbose flag is set.
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) {
+    Rcout << "mzkitcpp::get_consensus_spectrum() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  }
+  
+  return output;
+}
+
+
+// Internal function for actually creating function
+DataFrame _generate_consensus_spectrum(
+  const pair<vector<mzSample*>, vector<Scan*>> inputs,
+  const List& params,
+  const bool& verbose,
+  const bool& debug
+) {
+  // retrieve inputs
+  vector<mzSample*> samples = inputs.first;
+  vector<Scan*> scans = inputs.second;
+  
+  // Initialize outputs
+  vector<float> mz{};
+  vector<float> intensity{};
+  Fragment *parent = nullptr;
+  
+  if (!scans.empty()) {
+    
+    shared_ptr<PeaksSearchParameters> searchParams = listToPeaksSearchParams(params, true, true, debug);
+    
+    parent = Fragment::createFromScans(scans, searchParams, debug);
+    
+    if (parent) {
+      if (parent->consensus){
+        if (debug) Rcout << "parent->consensus has " << parent->consensus->nobs() << " peaks." << endl;
+        mz = parent->consensus->mzs;
+        intensity = parent->consensus->intensity_array;
+      } else {
+        if (debug) Rcout << "parent->consensus Fragment* is NULL!" << endl;
+      }
+    } else {
+      if (debug) Rcout << "parent Fragment* is NULL!" << endl;
+    }
+  }
+
+  NumericVector output_mz = wrap(mz);
+  NumericVector output_intensity = wrap(intensity);
+  
+  DataFrame output = DataFrame::create(
+    
+    //Scan information
+    Named("mz") = output_mz,
+    Named("intensity") = output_intensity,
+    
+    _["stringsAsFactors"] = false);
+  
+  
+  //cleanup
+  mzUtils::delete_all(samples);
+  if (parent) delete(parent); //handles deletion of parent->brothers
+  
+  return output; 
+}
+
+// [[Rcpp::export]]
 DataFrame get_background_subtracted_scan_data(
     const String& sample_file,
     const int& target_scan_num,
-    const int& background_scan_num,
-    const double& ppm_tol,
+    const List& params,
     const bool& verbose=true,
     const bool& debug=false) {
   
@@ -444,25 +689,60 @@ DataFrame get_background_subtracted_scan_data(
   //MAVEN scan num is actually the spectrumIndex value, which starts at 0.
   //Assume input scan number counts from 1 instead of 0
   int mavenTargetScanNum = target_scan_num-1;
-  int mavenBackgroundScanNum = background_scan_num-1;
   
   vector<float> mz{};
   vector<float> intensity{};
+  
   if (mavenTargetScanNum >= 0 && mavenTargetScanNum < sample->scanCount()) {
-    Scan *scan = sample->scans[mavenTargetScanNum];
     
-    if (mavenBackgroundScanNum >= 0 && mavenBackgroundScanNum < sample->scanCount()) {
-      Scan *backgroundScan = sample->scans[mavenBackgroundScanNum];
-      scan->subtractBackgroundScan(backgroundScan, ppm_tol, debug);
-    } else {
-      Rcout << "background scan number #" 
-            << background_scan_num 
-            << " not found - background scan subtraction not performed." 
-            << endl;
+    Scan *targetScan = sample->scans[mavenTargetScanNum];
+    
+    double backgroundSubtractionPpmTol = 3.0;
+    if (params.containsElementNamed("backgroundSubtractionPpmTol")) {
+      backgroundSubtractionPpmTol = params["backgroundSubtractionPpmTol"];
     }
     
-    mz = scan->mz;
-    intensity = scan->intensity;
+    IntegerVector scanNums = params["backgroundScanNums"];
+    shared_ptr<PeaksSearchParameters> backgroundParams = listToPeaksSearchParams(params, true, true, debug);
+    
+    bool backgroundMatchToZeroIntensity = true;
+    if (params.containsElementNamed("backgroundMatchToZeroIntensity")) {
+      backgroundMatchToZeroIntensity = params["backgroundMatchToZeroIntensity"];
+    }
+    
+    if (targetScan) {
+      
+      vector<Scan*> backgroundSubtractionScans{};
+      
+      for (unsigned int i = 0; i < scanNums.length(); i++) {
+        int mavenScanNum = (scanNums[i]-1);
+        Scan *scan = sample->getScan(mavenScanNum);
+        
+        if (scan) {
+          backgroundSubtractionScans.push_back(scan);
+        }
+      }
+      
+      if (!backgroundSubtractionScans.empty()) {
+        Fragment *backgroundFragment = Fragment::createFromScans(backgroundSubtractionScans, backgroundParams, debug);
+        
+        if (backgroundFragment && backgroundFragment->consensus) {
+          targetScan->subtractBackground(
+              backgroundFragment->consensus->mzs,
+              backgroundFragment->consensus->intensity_array,
+              backgroundSubtractionPpmTol,
+              backgroundMatchToZeroIntensity,
+              debug);
+        }
+        
+        if (verbose) {
+          Rcout << "Identified, parsed, and created a background spectrum from " << backgroundSubtractionScans.size() << " background scans." << endl;
+        }
+      }
+    }
+    
+    mz = targetScan->mz;
+    intensity = targetScan->intensity;
   }
   
   NumericVector output_mz = wrap(mz);
