@@ -6,17 +6,16 @@
   Library of low-level functions designed for analyzing mass spectrometry data.
 }
 \description{
-  c++ implementations of functions useful for analyzing mass spectrometry data.
-  Designed for integration with rums, clamdb, clamqc, and calicomics R packages.
-  Inputs to functions are usually data frames defined in rums, clamdb, clamqc, or calicomics
+  Mass spectrometry utility functions and processing algorithms written in C++, exposed in R package.
+  This package has a direct connection to maven_core C++ library, and is the preferred library for wrapping maven_core functionality into R.
 }
 \section{Available Functions}{
   \link{update_rts}: transform a vector of RTs based on a table of RT mappings.\cr
   \link{get_ms2_scans}: retrieve all MS2 scans from directory of mzML or mzXML files.\cr
 }
 \details{
-  This package should sit below clamr in the dependency tree.
-  It depends on maven_core.
+   Algorithms are primarily written in [maven_core](https://github.com/eugenemel/maven_core/),
+   and Rcpp is used to wrap maven_core data objects into R-friendly outputs (e.g., data frames and lists.)
 }
 \author{
 Phillip Seitzer
