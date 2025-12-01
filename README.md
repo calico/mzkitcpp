@@ -6,5 +6,5 @@ wrapping `maven_core` functionality into R.
 # Installation
 Execute the following command in an R console:
 ```
-remotes::install_github("calico/mzkitcpp-public-test", force=TRUE, build_vignettes=TRUE)
+remotes::install_github("calico/mzkitcpp", force=TRUE, build_vignettes=TRUE)
 ```
