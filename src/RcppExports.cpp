@@ -490,6 +490,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// exact_mass_peptide
+double exact_mass_peptide(const String& peptideSequence, bool verbose);
+RcppExport SEXP _mzkitcpp_exact_mass_peptide(SEXP peptideSequenceSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type peptideSequence(peptideSequenceSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(exact_mass_peptide(peptideSequence, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// envelope_dist_peptide
+DataFrame envelope_dist_peptide(const String& peptideSequence, double threshold, bool debug);
+RcppExport SEXP _mzkitcpp_envelope_dist_peptide(SEXP peptideSequenceSEXP, SEXP thresholdSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type peptideSequence(peptideSequenceSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< bool >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(envelope_dist_peptide(peptideSequence, threshold, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
 // adductize_exact_mass
 double adductize_exact_mass(const double& exact_mass, const String& adduct, bool verbose);
 RcppExport SEXP _mzkitcpp_adductize_exact_mass(SEXP exact_massSEXP, SEXP adductSEXP, SEXP verboseSEXP) {
@@ -513,6 +538,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const String& >::type adduct(adductSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(adductize_formula(formula, adduct, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// adductize_peptide
+double adductize_peptide(const String& peptideSequence, const String& adduct, bool verbose);
+RcppExport SEXP _mzkitcpp_adductize_peptide(SEXP peptideSequenceSEXP, SEXP adductSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type peptideSequence(peptideSequenceSEXP);
+    Rcpp::traits::input_parameter< const String& >::type adduct(adductSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(adductize_peptide(peptideSequence, adduct, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -555,19 +593,47 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_consensus_spectrum
+DataFrame get_consensus_spectrum(const String& sample_file, const IntegerVector& scan_nums, const List& params, const bool& verbose, const bool& debug);
+RcppExport SEXP _mzkitcpp_get_consensus_spectrum(SEXP sample_fileSEXP, SEXP scan_numsSEXP, SEXP paramsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type sample_file(sample_fileSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type scan_nums(scan_numsSEXP);
+    Rcpp::traits::input_parameter< const List& >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_consensus_spectrum(sample_file, scan_nums, params, verbose, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_multi_file_consensus_spectrum
+DataFrame get_multi_file_consensus_spectrum(const DataFrame& scans_table, const List& params, const bool& verbose, const bool& debug);
+RcppExport SEXP _mzkitcpp_get_multi_file_consensus_spectrum(SEXP scans_tableSEXP, SEXP paramsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type scans_table(scans_tableSEXP);
+    Rcpp::traits::input_parameter< const List& >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_multi_file_consensus_spectrum(scans_table, params, verbose, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_background_subtracted_scan_data
-DataFrame get_background_subtracted_scan_data(const String& sample_file, const int& target_scan_num, const int& background_scan_num, const double& ppm_tol, const bool& verbose, const bool& debug);
-RcppExport SEXP _mzkitcpp_get_background_subtracted_scan_data(SEXP sample_fileSEXP, SEXP target_scan_numSEXP, SEXP background_scan_numSEXP, SEXP ppm_tolSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+DataFrame get_background_subtracted_scan_data(const String& sample_file, const int& target_scan_num, const List& params, const bool& verbose, const bool& debug);
+RcppExport SEXP _mzkitcpp_get_background_subtracted_scan_data(SEXP sample_fileSEXP, SEXP target_scan_numSEXP, SEXP paramsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const String& >::type sample_file(sample_fileSEXP);
     Rcpp::traits::input_parameter< const int& >::type target_scan_num(target_scan_numSEXP);
-    Rcpp::traits::input_parameter< const int& >::type background_scan_num(background_scan_numSEXP);
-    Rcpp::traits::input_parameter< const double& >::type ppm_tol(ppm_tolSEXP);
+    Rcpp::traits::input_parameter< const List& >::type params(paramsSEXP);
     Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_background_subtracted_scan_data(sample_file, target_scan_num, background_scan_num, ppm_tol, verbose, debug));
+    rcpp_result_gen = Rcpp::wrap(get_background_subtracted_scan_data(sample_file, target_scan_num, params, verbose, debug));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -836,12 +902,17 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_monoiosotopic_mass", (DL_FUNC) &_mzkitcpp_monoiosotopic_mass, 3},
     {"_mzkitcpp_precursor_mass", (DL_FUNC) &_mzkitcpp_precursor_mass, 4},
     {"_mzkitcpp_exact_mass", (DL_FUNC) &_mzkitcpp_exact_mass, 2},
+    {"_mzkitcpp_exact_mass_peptide", (DL_FUNC) &_mzkitcpp_exact_mass_peptide, 2},
+    {"_mzkitcpp_envelope_dist_peptide", (DL_FUNC) &_mzkitcpp_envelope_dist_peptide, 3},
     {"_mzkitcpp_adductize_exact_mass", (DL_FUNC) &_mzkitcpp_adductize_exact_mass, 3},
     {"_mzkitcpp_adductize_formula", (DL_FUNC) &_mzkitcpp_adductize_formula, 3},
+    {"_mzkitcpp_adductize_peptide", (DL_FUNC) &_mzkitcpp_adductize_peptide, 3},
     {"_mzkitcpp_name_summaries", (DL_FUNC) &_mzkitcpp_name_summaries, 2},
     {"_mzkitcpp_get_scan_metadata", (DL_FUNC) &_mzkitcpp_get_scan_metadata, 3},
     {"_mzkitcpp_get_scan_data", (DL_FUNC) &_mzkitcpp_get_scan_data, 4},
-    {"_mzkitcpp_get_background_subtracted_scan_data", (DL_FUNC) &_mzkitcpp_get_background_subtracted_scan_data, 6},
+    {"_mzkitcpp_get_consensus_spectrum", (DL_FUNC) &_mzkitcpp_get_consensus_spectrum, 5},
+    {"_mzkitcpp_get_multi_file_consensus_spectrum", (DL_FUNC) &_mzkitcpp_get_multi_file_consensus_spectrum, 4},
+    {"_mzkitcpp_get_background_subtracted_scan_data", (DL_FUNC) &_mzkitcpp_get_background_subtracted_scan_data, 5},
     {"_mzkitcpp_predict_formula", (DL_FUNC) &_mzkitcpp_predict_formula, 5},
     {"_mzkitcpp_import_msp_lipids_library", (DL_FUNC) &_mzkitcpp_import_msp_lipids_library, 7},
     {"_mzkitcpp_export_msp_lipids_library", (DL_FUNC) &_mzkitcpp_export_msp_lipids_library, 5},

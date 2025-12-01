@@ -125,12 +125,24 @@ exact_mass <- function(formula, verbose = FALSE) {
     .Call(`_mzkitcpp_exact_mass`, formula, verbose)
 }
 
+exact_mass_peptide <- function(peptideSequence, verbose = FALSE) {
+    .Call(`_mzkitcpp_exact_mass_peptide`, peptideSequence, verbose)
+}
+
+envelope_dist_peptide <- function(peptideSequence, threshold = 1e-6, debug = FALSE) {
+    .Call(`_mzkitcpp_envelope_dist_peptide`, peptideSequence, threshold, debug)
+}
+
 adductize_exact_mass <- function(exact_mass, adduct, verbose = FALSE) {
     .Call(`_mzkitcpp_adductize_exact_mass`, exact_mass, adduct, verbose)
 }
 
 adductize_formula <- function(formula, adduct, verbose = FALSE) {
     .Call(`_mzkitcpp_adductize_formula`, formula, adduct, verbose)
+}
+
+adductize_peptide <- function(peptideSequence, adduct, verbose = FALSE) {
+    .Call(`_mzkitcpp_adductize_peptide`, peptideSequence, adduct, verbose)
 }
 
 name_summaries <- function(compoundName, debug = FALSE) {
@@ -145,8 +157,16 @@ get_scan_data <- function(sample_file, scan_num, verbose = TRUE, debug = FALSE) 
     .Call(`_mzkitcpp_get_scan_data`, sample_file, scan_num, verbose, debug)
 }
 
-get_background_subtracted_scan_data <- function(sample_file, target_scan_num, background_scan_num, ppm_tol, verbose = TRUE, debug = FALSE) {
-    .Call(`_mzkitcpp_get_background_subtracted_scan_data`, sample_file, target_scan_num, background_scan_num, ppm_tol, verbose, debug)
+get_consensus_spectrum <- function(sample_file, scan_nums, params, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_get_consensus_spectrum`, sample_file, scan_nums, params, verbose, debug)
+}
+
+get_multi_file_consensus_spectrum <- function(scans_table, params, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_get_multi_file_consensus_spectrum`, scans_table, params, verbose, debug)
+}
+
+get_background_subtracted_scan_data <- function(sample_file, target_scan_num, params, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_get_background_subtracted_scan_data`, sample_file, target_scan_num, params, verbose, debug)
 }
 
 predict_formula <- function(mz, adduct, ppm = 10.0, legal_atom_counts = NULL, debug = FALSE) {
