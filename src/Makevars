@@ -5,10 +5,8 @@ CXX14 = /usr/bin/clang++
 CXX17 = /usr/bin/clang++
 CXX20 = /usr/bin/clang++
 
-CXX_STD = CXX11
+CXX_STD = CXX14 # Match the Qt CONFIG += std++14 from maven_core
 
-# Define base paths using $(CURDIR) for absolute reliability from src/
-# Remove trailing slashes from variable definitions to avoid accidental double slashes
 MAVEN_CORE_BASE = $(CURDIR)/maven_core
 LIBMAVEN_DIR    = $(MAVEN_CORE_BASE)/libmaven
 PUGIXML_SRC_DIR = $(MAVEN_CORE_BASE)/pugixml/src
@@ -20,38 +18,23 @@ MSTOOLKIT_EXPAT_DIR     = $(MSTOOLKIT_TOP_SRC_DIR)/expat-2.0.1
 MSTOOLKIT_INNER_SRC_DIR = $(MSTOOLKIT_TOP_SRC_DIR)/MSToolkit
 MSTOOLKIT_MZPARSER_DIR  = $(MSTOOLKIT_TOP_SRC_DIR)/mzParser
 
-# PKG_CPPFLAGS: Ensure all include paths are similarly anchored or explicitly relative to $(CURDIR)
-PKG_CPPFLAGS+= -Dlibmzkit_shared_EXPORTS -I$(CURDIR)/libmzkit -I$(CURDIR) -pedantic -fPIC
+# CONSOLIDATED FLAGS
+# Added ZLIB, DHAVE_EXPAT_CONFIG_H, and _NOSQLITE to match the original environment
+PKG_CPPFLAGS = -I$(CURDIR)/libmzkit -I$(CURDIR) \
+               -I$(MAVEN_CORE_BASE) -I$(LIBMAVEN_DIR) \
+               -I$(PUGIXML_SRC_DIR) -I$(MSTOOLKIT_INCLUDE_DIR) \
+               -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DGCC \
+               -DZLIB -DHAVE_EXPAT_CONFIG_H -D_NOSQLITE -fPIC
 
-PKG_CPPFLAGS+= -I$(MAVEN_CORE_BASE)
-PKG_CPPFLAGS+= -I$(LIBMAVEN_DIR)
-PKG_CPPFLAGS+= -I$(PUGIXML_SRC_DIR)
-PKG_CPPFLAGS+= -I$(MSTOOLKIT_INCLUDE_DIR) # This is correctly anchored
+# OS Specific logic for Mac (from your .pri file)
+# Note: R standardly handles -lz via PKG_LIBS
+PKG_LIBS = -lz -lpthread -lm -ldl
 
-PKG_CPPFLAGS+= -D_FILE_OFFSET_BITS=64
-PKG_CPPFLAGS+= -D_LARGEFILE_SOURCE
-PKG_CPPFLAGS+= -DGCC
+# Source Discovery
+RCPP_SOURCES = $(wildcard $(CURDIR)/*.cpp)
+LIBMAVEN_SOURCES = $(wildcard $(LIBMAVEN_DIR)/*.cpp)
+PUGIXML_SOURCES = $(wildcard $(PUGIXML_SRC_DIR)/*.cpp)
 
-# Additional flags for better testing (keep -v for verbose output if still debugging)
-PKG_CXXFLAGS+= -v
-PKG_LDFLAGS+= -v
-
-# changes necessary to work with Big Sur
-PKG_LIBS+= -F/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreFoundation.framework/..
-PKG_LIBS+= -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
-
-LIBS += -L. -lz -lpthread -lm -ldl
-PKG_LIBS+= -L. -lz -lpthread -lm -ldl
-
-PKG_CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -DHAVE_EXPAT_CONFIG_H -D_NOSQLITE
-
-# Explicitly use $(CURDIR) for wildcard searches to ensure they're anchored from src/
-RCPP_SOURCES=$(wildcard $(CURDIR)/*.cpp)
-LIBMAVEN_SOURCES=$(wildcard $(LIBMAVEN_DIR)/*.cpp)
-PUGIXML_SOURCES=$(wildcard $(PUGIXML_SRC_DIR)/*.cpp)
-
-# Ensure every source file path is correctly constructed from its base variable
-# and matches the exact file system path.
 MSTOOLKIT_SOURCES = \
 	$(MSTOOLKIT_INNER_SRC_DIR)/MSObject.cpp \
 	$(MSTOOLKIT_INNER_SRC_DIR)/MSReader.cpp \
@@ -77,9 +60,8 @@ MSTOOLKIT_SOURCES = \
 	$(MSTOOLKIT_MZPARSER_DIR)/MSNumpress.cpp \
 	$(MSTOOLKIT_MZPARSER_DIR)/mzMLReader.cpp \
 	$(MSTOOLKIT_MZPARSER_DIR)/mzp_base64.cpp
-	
-SOURCES= $(PUGIXML_SOURCES) $(MSTOOLKIT_SOURCES) $(LIBMAVEN_SOURCES) $(RCPP_SOURCES)
 
-OBJECTS= $(SOURCES:.cpp=.o)
+SOURCES = $(PUGIXML_SOURCES) $(MSTOOLKIT_SOURCES) $(LIBMAVEN_SOURCES) $(RCPP_SOURCES)
+OBJECTS = $(SOURCES:.cpp=.o)
 
 all: $(SHLIB)
