@@ -1,6 +1,6 @@
 Package: mzkitcpp
 Title: Functions for plotting and visualization of metabolomics data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person(
       given = "Phil",
@@ -18,8 +18,11 @@ Description: Fast C++ functions, including maven_core integrations
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: 
-	Rcpp,
-	BH,
-	RcppEigen
-LinkingTo: Rcpp, BH
-SystemRequirements: zlib, pthreads, math library, libdl; a C/C++ compiler like g++ or clang++
+    Rcpp,
+    BH,
+    RcppEigen
+LinkingTo: 
+    Rcpp, 
+    BH,
+    RcppEigen
+SystemRequirements: zlib, pthreads, math library, libdl, C++11
