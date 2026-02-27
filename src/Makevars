@@ -5,7 +5,7 @@ CXX14 = /usr/bin/clang++
 CXX17 = /usr/bin/clang++
 CXX20 = /usr/bin/clang++
 
-CXX_STD = CXX14 # Match the Qt CONFIG += std++14 from maven_core
+CXX_STD = CXX11 # Necessary for older Eigen version in maven_core
 
 MAVEN_CORE_BASE = $(CURDIR)/maven_core
 LIBMAVEN_DIR    = $(MAVEN_CORE_BASE)/libmaven
@@ -34,6 +34,7 @@ PKG_LIBS = -lz -lpthread -lm -ldl
 RCPP_SOURCES = $(wildcard $(CURDIR)/*.cpp)
 LIBMAVEN_SOURCES = $(wildcard $(LIBMAVEN_DIR)/*.cpp)
 PUGIXML_SOURCES = $(wildcard $(PUGIXML_SRC_DIR)/*.cpp)
+LIBMZKIT_SOURCES = $(wildcard $(CURDIR)/libmzkit/*.cpp)
 
 MSTOOLKIT_SOURCES = \
 	$(MSTOOLKIT_INNER_SRC_DIR)/MSObject.cpp \
@@ -61,7 +62,7 @@ MSTOOLKIT_SOURCES = \
 	$(MSTOOLKIT_MZPARSER_DIR)/mzMLReader.cpp \
 	$(MSTOOLKIT_MZPARSER_DIR)/mzp_base64.cpp
 
-SOURCES = $(PUGIXML_SOURCES) $(MSTOOLKIT_SOURCES) $(LIBMAVEN_SOURCES) $(RCPP_SOURCES)
+SOURCES = $(PUGIXML_SOURCES) $(MSTOOLKIT_SOURCES) $(LIBMAVEN_SOURCES) $(RCPP_SOURCES) $(LIBMZKIT_SOURCES)
 OBJECTS = $(SOURCES:.cpp=.o)
 
 all: $(SHLIB)
