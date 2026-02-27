@@ -3,27 +3,28 @@
 \alias{mzkitcpp}
 \docType{package}
 \title{
-Library of low-level functions designed for analyzing mass spectrometry data.
+  Library of low-level functions designed for analyzing mass spectrometry data.
 }
 \description{
-Mass spectrometry utility functions and processing algorithms written in C++, exposed in R package.
-This package has a direct connection to maven_core C++ library, and is the preferred library for wrapping maven_core functionality into R.
+  c++ implementations of functions useful for analyzing mass spectrometry data.
+  Designed for integration with rums, clamdb, clamqc, and calicomics R packages.
+  Inputs to functions are usually data frames defined in rums, clamdb, clamqc, or calicomics
 }
 \section{Available Functions}{
-\itemize{
-  \item \code{\link{update_rts}}: transform a vector of RTs based on a table of RT mappings.
-  \item \code{\link{get_ms2_scans}}: retrieve all MS2 scans from directory of mzML or mzXML files.
-}
+  \link{update_rts}: transform a vector of RTs based on a table of RT mappings.\cr
+  \link{get_ms2_scans}: retrieve all MS2 scans from directory of mzML or mzXML files.\cr
 }
 \details{
-  Algorithms are primarily written in \href{https://github.com/eugenemel/maven_core/}{maven\_core},
-  and Rcpp is used to wrap maven\_core data objects into R-friendly outputs (e.g., data frames and lists.)
+  This package should sit below clamr in the dependency tree.
+  It depends on maven_core.
 }
 \author{
 Phillip Seitzer
 Maintainer: phillipseitzer <phillipseitzer@calicolabs.com>
 }
 \references{
-No publication yet!
+   No publication yet!
 }
 \keyword{ mzkitcpp }
+% \seealso{
+%}
