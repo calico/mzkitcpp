@@ -6,6 +6,7 @@ CXX17 = /usr/bin/clang++
 CXX20 = /usr/bin/clang++
 
 CXX_STD = CXX11 # Necessary for older Eigen version in maven_core
+PKG_CXXFLAGS = -std=c++11 # Necessary to instruct R to use C++11
 
 MAVEN_CORE_BASE = $(CURDIR)/maven_core
 LIBMAVEN_DIR    = $(MAVEN_CORE_BASE)/libmaven
