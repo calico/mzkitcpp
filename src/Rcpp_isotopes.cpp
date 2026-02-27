@@ -14,6 +14,8 @@
 using namespace Rcpp;
 using namespace std;
 
+#include <RcppEigen.h>
+// [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::plugins("cpp11")]]
 
 // LIST OF FUNCTIONS
@@ -53,45 +55,45 @@ DataFrame ISO_isotope_matrices(
 //        ==========================================================           //
 
 map<int, mzSample*> get_mzSamples(const DataFrame& samples_tbl, const String& mzML_directory, const bool& debug){
-  
+
   if (debug) Rcout << "Loading samples..." << endl;
-  
+
   map<int, mzSample*> mzSamples{};
-  
+
   IntegerVector sampleIds = samples_tbl["sampleId"];
   StringVector sampleNames = samples_tbl["name"];
-  
+
   string mzMLDirectoryStr = mzML_directory.get_cstring();
-  
+
   for (unsigned int i = 0; i < sampleIds.size(); i++){
-    
+
     int sampleId = sampleIds.at(i);
-    
+
     String sampleNameR = sampleNames.at(i);
     string sampleFile = mzMLDirectoryStr + "/" + sampleNameR.get_cstring();
-    
+
     mzSample *sample = new mzSample();
     sample->loadSample(sampleFile.c_str());
     sample->setSampleId(sampleId);
-    
-    if(debug) {  
+
+    if(debug) {
       sample->summary();
       Rcout << "Finished loading sample #" << (i+1) << endl;
     }
-    
+
     mzSamples.insert(make_pair(sampleId, sample));
-    
+
   }
-  
+
   if (debug) Rcout << "Loaded " << mzSamples.size() << " samples." << endl;
-  
+
   return mzSamples;
 }
 
 map<int, vector<Peak>> get_peaks(const DataFrame& peaks_tbl, map<int, mzSample*> samples, const bool& debug) {
-  
+
   map<int, vector<Peak>> groupIdToPeaks{};
-  
+
   NumericVector peaks_baseMz = peaks_tbl["baseMz"];
   IntegerVector peaks_fromBlankSample = peaks_tbl["fromBlankSample"];
   NumericVector peaks_gaussFitR2 = peaks_tbl["gaussFitR2"];
@@ -140,13 +142,13 @@ map<int, vector<Peak>> get_peaks(const DataFrame& peaks_tbl, map<int, mzSample*>
   NumericVector peaks_smoothedSignalBaselineRatio = peaks_tbl["smoothedSignalBaselineRatio"];
   NumericVector peaks_symmetry = peaks_tbl["symmetry"];
   IntegerVector peaks_width = peaks_tbl["width"];
-  
+
   for (unsigned int i=0; i < peaks_groupIds.size(); i++) {
-    
+
     int groupId = peaks_groupIds[i];
-    
+
     Peak p;
-    
+
     p.baseMz = peaks_baseMz[i];
     p.fromBlankSample = peaks_fromBlankSample[i];
     p.gaussFitR2 = peaks_gaussFitR2[i];
@@ -194,31 +196,31 @@ map<int, vector<Peak>> get_peaks(const DataFrame& peaks_tbl, map<int, mzSample*>
     p.smoothedSignalBaselineRatio = peaks_smoothedSignalBaselineRatio[i];
     p.symmetry = peaks_symmetry[i];
     p.width = peaks_width[i];
-    
+
     // associate with correct mzSample*
     int peaksSampleId = peaks_sampleId[i];
     p.sample = samples.at(peaksSampleId);
-    
+
     if (groupIdToPeaks.find(groupId) == groupIdToPeaks.end()) {
       groupIdToPeaks.insert(make_pair(groupId, vector<Peak>{}));
     }
     groupIdToPeaks.at(groupId).push_back(p);
-    
+
   }
-  
+
   if (debug) {
     Rcout << "Organized " << peaks_groupIds.size() << " peaks into " << groupIdToPeaks.size() << " groups." << endl;
   }
-  
+
   return groupIdToPeaks;
 }
 
 
 vector<PeakGroup> get_groups(const DataFrame& groups_tbl, map<int, vector<Peak>> peaks, const bool& debug) {
-  
+
   //initialize output
   vector<PeakGroup> groups;
-  
+
   // inputs
   IntegerVector groups_groupId = groups_tbl["groupId"];
   IntegerVector groups_parentGroupId = groups_tbl["parentGroupId"];
@@ -228,7 +230,7 @@ vector<PeakGroup> get_groups(const DataFrame& groups_tbl, map<int, vector<Peak>>
   NumericVector groups_groupRank = groups_tbl["groupRank"];
   StringVector groups_label = groups_tbl["label"];
   IntegerVector groups_type = groups_tbl["type"];
-  
+
   StringVector groups_srmId = groups_tbl["srmId"];
   IntegerVector groups_ms2EventCount = groups_tbl["ms2EventCount"];
   NumericVector groups_ms2Score = groups_tbl["ms2Score"];
@@ -247,27 +249,27 @@ vector<PeakGroup> get_groups(const DataFrame& groups_tbl, map<int, vector<Peak>>
   NumericVector groups_groupBackground = groups_tbl["groupBackground"];
   NumericVector groups_blankMaxHeight = groups_tbl["blankMaxHeight"];
   NumericVector groups_blankMedianHeight = groups_tbl["blankMedianHeight"];
-  
+
   // groupId, group
   map<int, PeakGroup> groupIdToGroup{};
-  
+
   // groupId, childrenIds
   map<int, set<int>> groupToChildren{};
-  
+
   // groupId
   set<int> parentGroups{};
-  
+
   long numTotalChildren = 0;
-  
+
   for (unsigned int i = 0; i < groups_parentGroupId.size(); i++) {
     PeakGroup g;
-    
+
     g.groupId = groups_groupId[i];
     g.tagString = groups_tagString[i];
     g.metaGroupId = groups_metaGroupId[i];
     g.expectedRtDiff = groups_expectedRtDiff[i];
     g.groupRank = groups_groupRank[i];
-    
+
     String labelsRString = groups_label[i];
     string labelsStr= labelsRString.get_cstring();
     for (char c : labelsStr) {
@@ -278,7 +280,7 @@ vector<PeakGroup> get_groups(const DataFrame& groups_tbl, map<int, vector<Peak>>
 
     String srmIdRString = groups_srmId[i];
     string srmIdStr = srmIdRString.get_cstring();
-    
+
     g.srmId = srmIdStr;
     g.ms2EventCount = groups_ms2EventCount[i];
     g.fragMatchScore.mergedScore = groups_ms2Score[i];
@@ -294,9 +296,9 @@ vector<PeakGroup> get_groups(const DataFrame& groups_tbl, map<int, vector<Peak>>
 
     String searchTableNameRString = groups_searchTableName[i];
     string searchTableNameStr = searchTableNameRString.get_cstring();
-    
+
     g.searchTableName = searchTableNameStr;
-    
+
     String displayNameRString = groups_displayName[i];
     string displayNameStr = displayNameRString.get_cstring();
 
@@ -313,14 +315,14 @@ vector<PeakGroup> get_groups(const DataFrame& groups_tbl, map<int, vector<Peak>>
     g.groupBackground = groups_groupBackground[i];
     g.blankMaxHeight = groups_blankMaxHeight[i];
     g.blankMedianHeight = groups_blankMedianHeight[i];
-    
+
     g.peaks = peaks.at(g.groupId);
 
     int groupId = g.groupId;
     int parentGroupId = groups_parentGroupId[i];
-    
+
     groupIdToGroup.insert(make_pair(groupId, g));
-    
+
     if (parentGroupId > 0) {
       if (groupToChildren.find(parentGroupId) == groupToChildren.end()) {
         groupToChildren.insert(make_pair(parentGroupId, set<int>{}));
@@ -331,66 +333,64 @@ vector<PeakGroup> get_groups(const DataFrame& groups_tbl, map<int, vector<Peak>>
       parentGroups.insert(groupId);
     }
   }
-  
+
   //add children
   for (auto it = groupIdToGroup.begin(); it != groupIdToGroup.end(); ++it) {
     int groupId = it->first;
     PeakGroup groupWithChildren = it->second;
-    
+
     //skip over any children peak groups
     if (parentGroups.find(groupId) == parentGroups.end()) continue;
-    
+
     if (groupToChildren.find(groupId) != groupToChildren.end()) {
       set<int> childrenGroupIds = groupToChildren.at(groupId);
-      
+
       for (const int& childGroupId : childrenGroupIds) {
         PeakGroup child = groupIdToGroup.at(childGroupId);
-        
+
         groupWithChildren.addChild(child);
       }
     }
-    
+
     groups.push_back(groupWithChildren);
-    
+
   }
-  
+
   if (debug) {
     Rcout << "Identified " << parentGroups.size() << " groups, collectively containing " << numTotalChildren << " children groups." << endl;
   }
-  
+
   return groups;
 }
 
-// [[Rcpp::depends(RcppEigen)]]
-
 DataFrame isotopeMatrixToDataFrame(const IsotopeMatrix& isotopeMatrix,
                                    const bool& debug) {
-  
+
   MatrixXf mat = isotopeMatrix.isotopesData;
-  
+
   // Initialize the output DataFrame
   DataFrame df = DataFrame::create(
     Named("stringsAsFactors") = false
   );
-  
+
   int nIsotopes = mat.rows();
   int nSamples = mat.cols();
-  
+
   // First column: sample names
   // All other columns: Isotopes
   CharacterVector sampleNames(nSamples);
   CharacterVector colNames = (nIsotopes + 1);
-  
+
   if (debug) Rcout << "i = 0 (sample): ";
   for (unsigned int j = 0; j < nSamples; j++) {
     sampleNames[j] = isotopeMatrix.sampleNames.at(j);
     if (debug) Rcout << sampleNames[j] << " ";
   }
   if (debug) Rcout << endl;
-  
+
   df.push_back(sampleNames);
   colNames[0] = "sample";
-  
+
   for (unsigned int i = 0; i < nIsotopes; i++) {
     NumericVector isotopeVector(nSamples);
     if (debug) Rcout << "i = " << (i+1) << ": " << isotopeMatrix.isotopeNames[i] << ": ";
@@ -402,59 +402,59 @@ DataFrame isotopeMatrixToDataFrame(const IsotopeMatrix& isotopeMatrix,
     colNames[(i+1)] = isotopeMatrix.isotopeNames[i];
     if (debug) Rcout << endl;
   }
-  
+
   df.names() = colNames;
-  
+
   if (debug) Rcout << "Successfully constructed DataFrame from IsotopeMatrix." << endl;
-  
+
   return df;
 }
 
 DataFrame isotopeMatrixToLongDataFrame(int groupId, const IsotopeMatrix& isotopeMatrix, const bool& debug) {
   MatrixXf mat = isotopeMatrix.isotopesData;
-  
+
   int nIsotopes = isotopeMatrix.isotopeNames.size();
   int nSamples = isotopeMatrix.sampleNames.size();
   int N = nIsotopes * nSamples;
   int counter = 0;
-  
+
   StringVector isotopeNameVector = StringVector(N);
   StringVector sampleNameVector = StringVector(N);
   NumericVector measurementVector = NumericVector(N);
-  
+
   if (debug) Rcout << "groupId = " << groupId << ": " << nIsotopes << " isotopes in " << nSamples << " samples, for N=" << N << endl;
-  
+
   for (unsigned int i = 0; i < nIsotopes; i++) {
-    
+
     string isotopeName = isotopeMatrix.isotopeNames[i];
-    
+
     for (unsigned int j = 0; j < nSamples; j++) {
-      
+
       string sampleName = isotopeMatrix.sampleNames[j];
-      
+
       double measurement = mat(j, i);
-      
+
       isotopeNameVector[counter] = isotopeName;
       sampleNameVector[counter] = sampleName;
       measurementVector[counter] = measurement;
-      
+
       counter++;
 
       if (debug) Rcout << "#" << counter << ": isotope=" << isotopeName << ", sample=" << sampleName << ": " << measurement << endl;
     }
   }
-  
+
   DataFrame df = DataFrame::create(
     Named("groupId") = IntegerVector(N, groupId),
     Named("sample") = sampleNameVector,
     Named("isotope") = isotopeNameVector,
     Named("measurement") = measurementVector,
-    
+
     Named("stringsAsFactors") = false
   );
-  
+
   if (debug) Rcout << "Successfully constructed Long DataFrame from IsotopeMatrix." << endl;
-  
+
   return df;
 }
 
@@ -467,45 +467,45 @@ DataFrame ISO_isotope_matrices(
     const StringVector& labeled_samples,
     const List params,
     const bool& debug) {
-  
+
   // First, pull out samples
   map<int, mzSample*> sampleBySampleId = get_mzSamples(samples_tbl, mzML_directory, debug);
-  
+
   // assign samples based on sample names
   vector<mzSample*> unlabeledSamples{};
   vector<mzSample*> labeledSamples{};
-  
+
   for (auto it = sampleBySampleId.begin(); it != sampleBySampleId.end(); ++it){
-    
+
     mzSample *sample = it->second;
     string sampleName = sample->sampleName;
-    
+
     bool isAssignedSample = false;
-    
+
     for (unsigned int i = 0; i < unlabeled_samples.size(); i++) {
       String unlabeledSampleStringR = unlabeled_samples[i];
       string unlabeledSampleStr = unlabeledSampleStringR.get_cstring();
-      
+
       if (unlabeledSampleStr == sampleName) {
         unlabeledSamples.push_back(sample);
         isAssignedSample = true;
         break;
       }
     }
-    
+
     if (isAssignedSample) continue;
-    
+
     for (unsigned int i = 0; i < labeled_samples.size(); i++) {
       String labeledSampleStringR = labeled_samples[i];
       string labeledSampleStr = labeledSampleStringR.get_cstring();
-      
+
       if (labeledSampleStr == sampleName) {
         labeledSamples.push_back(sample);
         break;
       }
     }
   }
-  
+
   if (debug) {
     Rcout << "Unlabeled Samples: " << endl;
     for (mzSample* sample : unlabeledSamples) {
@@ -518,37 +518,37 @@ DataFrame ISO_isotope_matrices(
     }
     Rcout << endl;
   }
-  
+
   // Create Peak objects
   map<int, vector<Peak>> peakByGroupId = get_peaks(peaks_tbl, sampleBySampleId, debug);
-  
+
   // Create PeakGroup objects
   vector<PeakGroup> groups = get_groups(groups_tbl, peakByGroupId, debug);
-  
+
   DataFrame df = DataFrame::create(
     Named("groupId") = IntegerVector(0),
     Named("sample") = StringVector(0),
     Named("isotope") = StringVector(0),
     Named("measurement") = NumericVector(0),
-    
+
     Named("stringsAsFactors") = false
   );
-  
+
   for (PeakGroup& pg : groups) {
-    
+
     //Require, at a minimum, [M+0], [M+1], and [M+2]
     //Each of these isotopes will correspond to a different child peak group.
     if (pg.children.size() < 3) continue;
-    
+
     IsotopeParameters isotopeParameters = pg.isotopeParameters;
-    
+
     if (params.containsElementNamed("diffIsoScoringCorrectNatAbundance")) {
       isotopeParameters.diffIsoScoringCorrectNatAbundance = params["diffIsoScoringCorrectNatAbundance"];
     }
     if (params.containsElementNamed("diffIsoScoringFractionOfSampleTotal")) {
       isotopeParameters.diffIsoScoringFractionOfSampleTotal = params["diffIsoScoringFractionOfSampleTotal"];
     }
-    
+
     IsotopeMatrix matrix = DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(
       &(pg),
       unlabeledSamples,
@@ -556,12 +556,12 @@ DataFrame ISO_isotope_matrices(
       isotopeParameters,
       debug
     );
-    
+
     DataFrame pgDf = isotopeMatrixToLongDataFrame(pg.groupId, matrix, debug);
-    
+
     df = Rcpp::Language("rbind", df, pgDf).eval();
-    
+
   }
-    
+
   return df;
 }
