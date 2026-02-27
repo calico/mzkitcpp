@@ -25,7 +25,8 @@ PKG_CPPFLAGS = -I$(CURDIR)/libmzkit -I$(CURDIR) \
                -I$(MAVEN_CORE_BASE) -I$(LIBMAVEN_DIR) \
                -I$(PUGIXML_SRC_DIR) -I$(MSTOOLKIT_INCLUDE_DIR) \
                -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DGCC \
-               -DZLIB -DHAVE_EXPAT_CONFIG_H -D_NOSQLITE -fPIC
+               -DZLIB -DHAVE_EXPAT_CONFIG_H -D_NOSQLITE -fPIC \
+               -Dlibmzkit_shared_EXPORTS
 
 # OS Specific logic for Mac (from your .pri file)
 # Note: R standardly handles -lz via PKG_LIBS
