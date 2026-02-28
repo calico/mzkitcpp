@@ -1,5 +1,5 @@
 // [[Rcpp::depends(RcppEigen)]]
-#include <RcppEigen.h>
+#include "bridge_eigen.h"
 #include <Rcpp.h>
 #include <stdio.h>
 #include <fstream>
