@@ -26,7 +26,7 @@ PKG_CPPFLAGS = -I$(CURDIR)/libmzkit -I$(CURDIR) \
                -I$(PUGIXML_SRC_DIR) -I$(MSTOOLKIT_INCLUDE_DIR) \
                -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DGCC \
                -DZLIB -DHAVE_EXPAT_CONFIG_H -D_NOSQLITE -fPIC \
-               -Dlibmzkit_shared_EXPORTS
+               -Dlibmzkit_shared_EXPORTS \
                -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS
 
 # OS Specific logic for Mac (from your .pri file)
