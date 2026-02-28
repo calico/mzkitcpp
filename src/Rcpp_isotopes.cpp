@@ -1,3 +1,5 @@
+// [[Rcpp::depends(RcppEigen)]]
+#include <RcppEigen.h>
 #include <Rcpp.h>
 #include <stdio.h>
 #include <fstream>
@@ -14,8 +16,6 @@
 using namespace Rcpp;
 using namespace std;
 
-#include <RcppEigen.h>
-// [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::plugins("cpp11")]]
 
 // LIST OF FUNCTIONS
