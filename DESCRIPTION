@@ -19,10 +19,8 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: 
     Rcpp,
-    BH,
-    RcppEigen
+    BH
 LinkingTo: 
     Rcpp, 
-    BH,
-    RcppEigen
+    BH
 SystemRequirements: zlib, pthreads, math library, libdl, C++11
