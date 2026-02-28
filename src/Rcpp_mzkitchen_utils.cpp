@@ -130,6 +130,9 @@ String mzk_get_isotope_parameters(const List& params, bool debug=false) {
     if (params.containsElementNamed("isCombineOverlappingIsotopes")) {
       isotopeParameters->isCombineOverlappingIsotopes = params["isCombineOverlappingIsotopes"];
     }
+    if (params.containsElementNamed("isCombineToSameNumberNeutrons")) {
+      isotopeParameters->isCombineToSameNumberNeutrons = params["isCombineToSameNumberNeutrons"];
+    }
     if (params.containsElementNamed("isApplyMZeroMzOffset")) {
       isotopeParameters->isApplyMZeroMzOffset = params["isApplyMZeroMzOffset"];
     }
