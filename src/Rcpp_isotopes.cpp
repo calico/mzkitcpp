@@ -1,10 +1,10 @@
 // [[Rcpp::depends(RcppEigen)]]
-#include <RcppEigen.h>
+// #include <RcppEigen.h>
 
 // Avoid problem with unsupported Eigen modules / confusion over template arguments
-namespace Eigen {
-  typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE Index;
-}
+// namespace Eigen {
+//   typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE Index;
+// }
 
 #include <Rcpp.h>
 #include <stdio.h>
