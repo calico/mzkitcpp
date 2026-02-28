@@ -27,7 +27,9 @@ PKG_CPPFLAGS = -I$(CURDIR)/libmzkit -I$(CURDIR) \
                -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DGCC \
                -DZLIB -DHAVE_EXPAT_CONFIG_H -D_NOSQLITE -fPIC \
                -Dlibmzkit_shared_EXPORTS \
-               -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS
+               -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS \
+               -DEIGEN_DEFAULT_DENSE_INDEX_TYPE=std::ptrdiff_t \
+               -DIndex=std::ptrdiff_t
 
 # OS Specific logic for Mac (from your .pri file)
 # Note: R standardly handles -lz via PKG_LIBS
