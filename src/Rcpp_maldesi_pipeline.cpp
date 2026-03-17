@@ -98,10 +98,10 @@ DataFrame maldesi_search(
   sample->loadSample(filename.c_str());
   String sample_basename = Rcpp::Language("basename", sample_file).eval();
 
-  StringVector input_compound_name;
-  StringVector input_molecular_formula;
-  StringVector input_peptide_sequence;
-  NumericVector input_compound_mz;
+  StringVector input_compound_name(library.nrows());
+  StringVector input_molecular_formula(library.nrows());
+  StringVector input_peptide_sequence(library.nrows());
+  NumericVector input_compound_mz(library.nrows());
 
 
   // Be strict about column names at this stage, to avoid dealing with

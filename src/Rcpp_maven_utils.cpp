@@ -313,7 +313,7 @@ double adductize_formula(const String& formula, const String& adduct, bool verbo
 
 /**
  * @brief
- *    Given a peptide sequence and an adduct name, return the precursor m/z.
+ *    Convert a peptide sequence to its molecular formula string.
  */
 // [[Rcpp::export]]
 String peptide_sequence_to_formula(const String& peptideSequence, bool verbose=false) {
@@ -323,13 +323,13 @@ String peptide_sequence_to_formula(const String& peptideSequence, bool verbose=f
   string peptideSequenceString = string(peptideSequence.get_cstring());
 
   string molecularFormula = MassCalculator::peptideSequenceToFormula(peptideSequenceString);
-  String molecularFormularRString = String(molecularFormula.c_str());
+  String molecularFormulaRString = String(molecularFormula.c_str());
 
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
   if (verbose) Rcout << "mzkitcpp::peptide_sequence_to_formula() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
 
-  return molecularFormularRString;
+  return molecularFormulaRString;
 }
 
 /**
