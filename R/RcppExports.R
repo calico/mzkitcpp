@@ -141,6 +141,10 @@ adductize_formula <- function(formula, adduct, verbose = FALSE) {
     .Call(`_mzkitcpp_adductize_formula`, formula, adduct, verbose)
 }
 
+peptide_sequence_to_formula <- function(peptideSequence, verbose = FALSE) {
+    .Call(`_mzkitcpp_peptide_sequence_to_formula`, peptideSequence, verbose)
+}
+
 adductize_peptide <- function(peptideSequence, adduct, verbose = FALSE) {
     .Call(`_mzkitcpp_adductize_peptide`, peptideSequence, adduct, verbose)
 }

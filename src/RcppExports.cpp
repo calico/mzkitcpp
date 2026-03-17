@@ -541,6 +541,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// peptide_sequence_to_formula
+String peptide_sequence_to_formula(const String& peptideSequence, bool verbose);
+RcppExport SEXP _mzkitcpp_peptide_sequence_to_formula(SEXP peptideSequenceSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type peptideSequence(peptideSequenceSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(peptide_sequence_to_formula(peptideSequence, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // adductize_peptide
 double adductize_peptide(const String& peptideSequence, const String& adduct, bool verbose);
 RcppExport SEXP _mzkitcpp_adductize_peptide(SEXP peptideSequenceSEXP, SEXP adductSEXP, SEXP verboseSEXP) {
@@ -906,6 +918,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_envelope_dist_peptide", (DL_FUNC) &_mzkitcpp_envelope_dist_peptide, 3},
     {"_mzkitcpp_adductize_exact_mass", (DL_FUNC) &_mzkitcpp_adductize_exact_mass, 3},
     {"_mzkitcpp_adductize_formula", (DL_FUNC) &_mzkitcpp_adductize_formula, 3},
+    {"_mzkitcpp_peptide_sequence_to_formula", (DL_FUNC) &_mzkitcpp_peptide_sequence_to_formula, 2},
     {"_mzkitcpp_adductize_peptide", (DL_FUNC) &_mzkitcpp_adductize_peptide, 3},
     {"_mzkitcpp_name_summaries", (DL_FUNC) &_mzkitcpp_name_summaries, 2},
     {"_mzkitcpp_get_scan_metadata", (DL_FUNC) &_mzkitcpp_get_scan_metadata, 3},
