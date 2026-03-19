@@ -2,20 +2,21 @@
 \alias{exact_mass}
 \title{Exact Mass}
 \description{
-Given a molecular formula, return the exact mass. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief Given a molecular formula, return the exact mass.
 }
 \usage{
 exact_mass(formula, verbose)
 }
 \arguments{
-\item{formula}{Argument formula.}
+\item{formula}{A character vector of chemical formulas.}
 
-\item{verbose}{Argument verbose.}
+\item{verbose}{A logical value indicating whether to print progress and informative messages.}
 
 }
 \value{
-Returns double.
+A numeric value representing the calculated mass, intensity, or other quantitative metric.
 }
 \details{
-Generated documentation for exact_mass.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to exact mass.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

@@ -2,30 +2,31 @@
 \alias{get_standard_rts}
 \title{Get Standard Rts}
 \description{
-This function exposes the C++ implementation of the get_standard_rts routine to R. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+This function is exposed from C++ via Rcpp to provide fast mass spectrometry data processing.
 }
 \usage{
 get_standard_rts(samples, standards, mzTolerance, rtTolerance, minIntensity, verbose, debug)
 }
 \arguments{
-\item{samples}{Argument samples.}
+\item{samples}{A character vector of file paths to sample raw files (e.g., mzML files), where each file represents a single mass spectrometry injection.}
 
-\item{standards}{Argument standards.}
+\item{standards}{A data frame or structure defining the internal or external standards used for calibration/alignment.}
 
-\item{mzTolerance}{Argument mzTolerance.}
+\item{mzTolerance}{A numeric value specifying the mass-to-charge (m/z) tolerance.}
 
-\item{rtTolerance}{Argument rtTolerance.}
+\item{rtTolerance}{A numeric value specifying the retention time (RT) tolerance.}
 
-\item{minIntensity}{Argument minIntensity.}
+\item{minIntensity}{A parameter specifying the minIntensity.}
 
-\item{verbose}{Argument verbose.}
+\item{verbose}{A logical value indicating whether to print progress and informative messages.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for get_standard_rts.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to get standard rts.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

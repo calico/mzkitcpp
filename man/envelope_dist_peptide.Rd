@@ -2,22 +2,23 @@
 \alias{envelope_dist_peptide}
 \title{Envelope Dist Peptide}
 \description{
-Given a peptide sequence, return the exact mass. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief Given a peptide sequence, return the exact mass. Scan information
 }
 \usage{
 envelope_dist_peptide(peptideSequence, threshold, debug)
 }
 \arguments{
-\item{peptideSequence}{Argument peptideSequence.}
+\item{peptideSequence}{A character string specifying the peptide amino acid sequence.}
 
-\item{threshold}{Argument threshold.}
+\item{threshold}{A parameter specifying the threshold.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for envelope_dist_peptide.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to envelope dist peptide.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

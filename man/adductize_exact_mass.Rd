@@ -2,22 +2,23 @@
 \alias{adductize_exact_mass}
 \title{Adductize Exact Mass}
 \description{
-Given an exact mass and an adduct name, return the precursor m/z. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief Given an exact mass and an adduct name, return the precursor m/z.
 }
 \usage{
 adductize_exact_mass(exact_mass, adduct, verbose)
 }
 \arguments{
-\item{exact_mass}{Argument exact_mass.}
+\item{exact_mass}{A parameter specifying the exact mass.}
 
-\item{adduct}{Argument adduct.}
+\item{adduct}{A character string specifying the chemical adduct (e.g., '[M+H]+', '[M-H]-').}
 
-\item{verbose}{Argument verbose.}
+\item{verbose}{A logical value indicating whether to print progress and informative messages.}
 
 }
 \value{
-Returns double.
+A numeric value representing the calculated mass, intensity, or other quantitative metric.
 }
 \details{
-Generated documentation for adductize_exact_mass.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to adductize exact mass.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

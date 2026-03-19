@@ -2,20 +2,21 @@
 \alias{mzk_get_isotope_parameters}
 \title{Mzk Get Isotope Parameters}
 \description{
-Given various parameter values, return a formatted string as produced by IsotopeParameters::encode() It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief Given various parameter values, return a formatted string as produced by IsotopeParameters::encode() isotope enumeration isotope extraction only consider max natural abundance error if the isIgnoreNaturalAbundance flag is TRUE - from MAVEN 1 diff iso specific
 }
 \usage{
 mzk_get_isotope_parameters(params, debug)
 }
 \arguments{
-\item{params}{Argument params.}
+\item{params}{A parameter specifying the params.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns String.
+A character string representing the processed output, file path, or status message.
 }
 \details{
-Generated documentation for mzk_get_isotope_parameters.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to mzk get isotope parameters.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

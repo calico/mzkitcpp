@@ -2,26 +2,27 @@
 \alias{record_set_to_msp_library}
 \title{Record Set To Msp Library}
 \description{
-metabolite_data is a data table that contains formatted metabolite records information (for use with DBv3). It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief metabolite_data is a data table that contains formatted metabolite records information (for use with DBv3). close msp file, free memory
 }
 \usage{
 record_set_to_msp_library(mspLibraryPath, metabolite_data, spectrum_filters, num_digits, debug)
 }
 \arguments{
-\item{mspLibraryPath}{Argument mspLibraryPath.}
+\item{mspLibraryPath}{A character string specifying the path to the spectral library (e.g., an MSP file).}
 
-\item{metabolite_data}{Argument metabolite_data.}
+\item{metabolite_data}{A numeric vector or data frame containing the primary data to be processed.}
 
-\item{spectrum_filters}{Argument spectrum_filters.}
+\item{spectrum_filters}{A parameter specifying the spectrum filters.}
 
-\item{num_digits}{Argument num_digits.}
+\item{num_digits}{An integer specifying the number of decimal places for rounding calculations or IDs.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns void.
+This function does not return a value (void). It is typically called for its side effects, such as writing to a file.
 }
 \details{
-Generated documentation for record_set_to_msp_library.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to record set to msp library.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

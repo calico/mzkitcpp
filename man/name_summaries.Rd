@@ -2,20 +2,21 @@
 \alias{name_summaries}
 \title{Name Summaries}
 \description{
-Given a vector of string formulas, return a vector of compound monoisotopic masses. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief Given a vector of string formulas, return a vector of compound monoisotopic masses.
 }
 \usage{
 name_summaries(compoundName, debug)
 }
 \arguments{
-\item{compoundName}{Argument compoundName.}
+\item{compoundName}{A parameter specifying the compoundName.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for name_summaries.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to name summaries.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

@@ -2,26 +2,27 @@
 \alias{get_consensus_spectrum}
 \title{Get Consensus Spectrum}
 \description{
-This function exposes the C++ implementation of the get_consensus_spectrum routine to R. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+This function is exposed from C++ via Rcpp to provide fast mass spectrometry data processing.
 }
 \usage{
 get_consensus_spectrum(sample_file, scan_nums, params, verbose, debug)
 }
 \arguments{
-\item{sample_file}{Argument sample_file.}
+\item{sample_file}{A parameter specifying the sample file.}
 
-\item{scan_nums}{Argument scan_nums.}
+\item{scan_nums}{A parameter specifying the scan nums.}
 
-\item{params}{Argument params.}
+\item{params}{A parameter specifying the params.}
 
-\item{verbose}{Argument verbose.}
+\item{verbose}{A logical value indicating whether to print progress and informative messages.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for get_consensus_spectrum.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to get consensus spectrum.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

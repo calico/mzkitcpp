@@ -2,20 +2,21 @@
 \alias{DI_encoded_search_params}
 \title{Di Encoded Search Params}
 \description{
-Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. This function exposes the C++ implementation of the DI_encoded_search_params routine to R. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. This function is exposed from C++ via Rcpp to provide fast mass spectrometry data processing.
 }
 \usage{
 DI_encoded_search_params(search_params, debug)
 }
 \arguments{
-\item{search_params}{Argument search_params.}
+\item{search_params}{A parameter specifying the search params.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns String.
+A character string representing the processed output, file path, or status message.
 }
 \details{
-Generated documentation for DI_encoded_search_params.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to di encoded search params.
+In the context of this package, 'DI' refers to Direct Infusion mass spectrometry, bypassing chromatographic separation. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

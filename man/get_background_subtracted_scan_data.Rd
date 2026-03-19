@@ -2,26 +2,27 @@
 \alias{get_background_subtracted_scan_data}
 \title{Get Background Subtracted Scan Data}
 \description{
-This function exposes the C++ implementation of the get_background_subtracted_scan_data routine to R. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+Assume input scan number counts from 1 instead of 0 Scan information
 }
 \usage{
 get_background_subtracted_scan_data(sample_file, target_scan_num, params, verbose, debug)
 }
 \arguments{
-\item{sample_file}{Argument sample_file.}
+\item{sample_file}{A parameter specifying the sample file.}
 
-\item{target_scan_num}{Argument target_scan_num.}
+\item{target_scan_num}{A parameter specifying the target scan num.}
 
-\item{params}{Argument params.}
+\item{params}{A parameter specifying the params.}
 
-\item{verbose}{Argument verbose.}
+\item{verbose}{A logical value indicating whether to print progress and informative messages.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for get_background_subtracted_scan_data.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to get background subtracted scan data.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

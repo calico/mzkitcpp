@@ -1,27 +1,26 @@
 \name{update_rts}
 \alias{update_rts}
-\title{Update RTs}
+\title{Update Rts}
+\description{
+* @brief
+}
 \usage{
-update_rts(rt_update_key, original_rts, sample_ids, debug = FALSE)
+update_rts(rt_update_key, original_rts, sample_ids, debug)
 }
 \arguments{
-\item{rt_update_key}{imported rt_update_key table from mzrolldb file.}
+\item{rt_update_key}{A numeric value or vector of retention times (RT).}
 
-\item{original_rts}{vector of untransformed rt values}
+\item{original_rts}{A numeric value or vector of retention times (RT).}
 
-\item{sample_ids}{vector of sample id values. Should be same size as \code{original_rts}.}
+\item{sample_ids}{A parameter specifying the sample ids.}
 
-\item{debug}{Debugging flag. Also prints execution time if set to \code{TRUE}.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
+
 }
 \value{
-Returns the original passed \code{original_rts} and \code{sample_ids} vectors as columns in a table, with a new column containing
-the adjusted values, \code{updated_rts}
-}
-\description{
-This function exposes the C++ implementation of the update_rts routine to R. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
-} update for next iteration if (debug) { Rcout << segment->sampleName << ": [" << segment->seg_start << " - " << segment->seg_end << "] <--> [" << segment->new_start << " - " << segment->new_end  << "]" << endl; } fall back to original rt
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-This function uses the Segmented Alignment approach implemented in \code{maven_core}. RT values are transformed based on simple linear inteprolation.
-If an RT value is detected that is outside of the range of any \code{AlignmentSegment}, then the original RT value is returned.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to update rts.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

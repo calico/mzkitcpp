@@ -2,20 +2,21 @@
 \alias{DI_unslice_library}
 \title{Di Unslice Library}
 \description{
-Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. Return previously sliced library as single data frame. sliced library is examined, slice by slice, and all (compound, adduct, fragment) tuples are examined to see if they are ever marked diagnostic. If a (compound, adduct, fragment) tuple is ever marked as diagnostic in any slice, that (compound, adduct, fragment) will be considered diagnostic, and exported with an asterisk as the first character in the fragment label.
+Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. This function is exposed from C++ via Rcpp to provide fast mass spectrometry data processing.
 }
 \usage{
 DI_unslice_library(sliced_lib, debug)
 }
 \arguments{
-\item{sliced_lib}{Argument sliced_lib.}
+\item{sliced_lib}{An object, list, or data frame containing the spectral library information.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for DI_unslice_library.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to di unslice library.
+In the context of this package, 'DI' refers to Direct Infusion mass spectrometry, bypassing chromatographic separation. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

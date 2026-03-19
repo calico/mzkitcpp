@@ -2,32 +2,33 @@
 \alias{get_eic}
 \title{Get Eic}
 \description{
-This function exposes the C++ implementation of the get_eic routine to R. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief
 }
 \usage{
 get_eic(samples, mzmin, mzmax, rtmin, rtmax, mslevel, smoothWindow, debug)
 }
 \arguments{
-\item{samples}{Argument samples.}
+\item{samples}{A character vector of file paths to sample raw files (e.g., mzML files), where each file represents a single mass spectrometry injection.}
 
-\item{mzmin}{Argument mzmin.}
+\item{mzmin}{A numeric value specifying a mass-to-charge (m/z) ratio.}
 
-\item{mzmax}{Argument mzmax.}
+\item{mzmax}{A numeric value specifying a mass-to-charge (m/z) ratio.}
 
-\item{rtmin}{Argument rtmin.}
+\item{rtmin}{A numeric value specifying the retention time (minimum).}
 
-\item{rtmax}{Argument rtmax.}
+\item{rtmax}{A numeric value specifying the retention time (maximum).}
 
-\item{mslevel}{Argument mslevel.}
+\item{mslevel}{An integer specifying the mass spectrometry level (e.g., 1 for MS1, 2 for MS2, 3 for MS3).}
 
-\item{smoothWindow}{Argument smoothWindow.}
+\item{smoothWindow}{An integer or numeric value specifying the sliding window size for smoothing or feature detection.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for get_eic.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to get eic.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

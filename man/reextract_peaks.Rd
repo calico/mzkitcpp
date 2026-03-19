@@ -2,32 +2,33 @@
 \alias{reextract_peaks}
 \title{Reextract Peaks}
 \description{
-This function exposes the C++ implementation of the reextract_peaks routine to R. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief clean up
 }
 \usage{
 reextract_peaks(compound_list, sample_file, intensity_type, mslevel, baselineSmoothingWindow, baselineDropTopX, verbose, debug)
 }
 \arguments{
-\item{compound_list}{Argument compound_list.}
+\item{compound_list}{A parameter specifying the compound list.}
 
-\item{sample_file}{Argument sample_file.}
+\item{sample_file}{A parameter specifying the sample file.}
 
-\item{intensity_type}{Argument intensity_type.}
+\item{intensity_type}{A character vector or factor specifying the type or category of the input data.}
 
-\item{mslevel}{Argument mslevel.}
+\item{mslevel}{An integer specifying the mass spectrometry level (e.g., 1 for MS1, 2 for MS2, 3 for MS3).}
 
-\item{baselineSmoothingWindow}{Argument baselineSmoothingWindow.}
+\item{baselineSmoothingWindow}{An integer or numeric value specifying the sliding window size for smoothing or feature detection.}
 
-\item{baselineDropTopX}{Argument baselineDropTopX.}
+\item{baselineDropTopX}{A parameter specifying the baselineDropTopX.}
 
-\item{verbose}{Argument verbose.}
+\item{verbose}{A logical value indicating whether to print progress and informative messages.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for reextract_peaks.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to reextract peaks.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

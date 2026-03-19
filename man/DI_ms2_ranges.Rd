@@ -2,22 +2,23 @@
 \alias{DI_ms2_ranges}
 \title{Di Ms2 Ranges}
 \description{
-Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. Determine the ms2 ranges associated with a given dataset. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. R-facing functions
 }
 \usage{
 DI_ms2_ranges(filename, collapse_overlaps, debug)
 }
 \arguments{
-\item{filename}{Argument filename.}
+\item{filename}{A character string specifying the path to the input or output file.}
 
-\item{collapse_overlaps}{Argument collapse_overlaps.}
+\item{collapse_overlaps}{A parameter specifying the collapse overlaps.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for DI_ms2_ranges.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to di ms2 ranges.
+In the context of this package, 'DI' refers to Direct Infusion mass spectrometry, bypassing chromatographic separation. It specifically handles MS2 (tandem mass spectrometry) data, which involves fragment ion analysis. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

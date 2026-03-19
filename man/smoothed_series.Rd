@@ -2,24 +2,25 @@
 \alias{smoothed_series}
 \title{Smoothed Series}
 \description{
-Given a data vector and various other parameters, perform smoothing. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+* @brief Given a data vector and various other parameters, perform smoothing.
 }
 \usage{
 smoothed_series(data, types, windowSizes, debug)
 }
 \arguments{
-\item{data}{Argument data.}
+\item{data}{A numeric vector or data frame containing the primary data to be processed.}
 
-\item{types}{Argument types.}
+\item{types}{A character vector or factor specifying the type or category of the input data.}
 
-\item{windowSizes}{Argument windowSizes.}
+\item{windowSizes}{An integer or numeric value specifying the sliding window size for smoothing or feature detection.}
 
-\item{debug}{Argument debug.}
+\item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
 }
 \value{
-Returns DataFrame.
+A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-Generated documentation for smoothed_series.
+This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to smoothed series.
+The implementation is written in C++ for performance and exposed to R via Rcpp.
 }
