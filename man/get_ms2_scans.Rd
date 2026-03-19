@@ -14,9 +14,7 @@ Returns the data contained the MS2 scans from all raw files in the \code{sample_
 This mimics a SQL call to an mzrollDB file, when the scans are saved to the file from peakdetector.
 }
 \description{
-Function to retrieve all MS2 scans from all raw files and format as a table.
-Replaces the need to write all MS2 scan information into the mzrollDB SQLite database file,
-and pull out of the file.
+samples_table is the data from the mzrollDB samples table. This function only uses the columns for name, filename, and sample ID number.
 }
 \details{
 This function can be used as a replacement for pulling MS2 information out of the

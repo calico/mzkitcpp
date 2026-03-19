@@ -18,9 +18,8 @@ Returns the original passed \code{original_rts} and \code{sample_ids} vectors as
 the adjusted values, \code{updated_rts}
 }
 \description{
-Transform a vector of RT values based on a retrieved alignment mapping. Mapping is coded as a series of mappings from an observed RT space to
-a reference RT space. The reference RT space may map to one sample in the experiment, or it may map to an RT space that is not found in any
-single sample, such as an averaged RT across many samples.
+This function exposes the C++ implementation of the update_rts routine to R. It takes the provided parameters and performs the corresponding mass spectrometry analysis step.
+} update for next iteration if (debug) { Rcout << segment->sampleName << ": [" << segment->seg_start << " - " << segment->seg_end << "] <--> [" << segment->new_start << " - " << segment->new_end  << "]" << endl; } fall back to original rt
 }
 \details{
 This function uses the Segmented Alignment approach implemented in \code{maven_core}. RT values are transformed based on simple linear inteprolation.
