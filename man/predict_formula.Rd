@@ -1,28 +1,27 @@
 \name{predict_formula}
 \alias{predict_formula}
-\title{Predict Formula}
+\title{Predict Molecular Formulas from m/z}
 \description{
-* @brief Given a vector of string formulas, return a vector of compound monoisotopic masses.
+Predicts possible molecular formulas from a measured m/z value. This function generates candidate formulas within a specified ppm tolerance by enumerating combinations of common elements (C, H, N, O, S, P, etc.) subject to chemical constraints.
 }
 \usage{
 predict_formula(mz, adduct, ppm, legal_atom_counts, debug)
 }
 \arguments{
-\item{mz}{A numeric value specifying a mass-to-charge (m/z) ratio.}
+\item{mz}{Numeric value specifying the observed precursor m/z ratio.}
 
-\item{adduct}{A character string specifying the chemical adduct (e.g., '[M+H]+', '[M-H]-').}
+\item{adduct}{Character string specifying the chemical adduct (e.g., '[M+H]+', '[M-H]-') to account for when back-calculating the neutral mass.}
 
-\item{ppm}{A numeric value specifying the mass tolerance in parts per million (ppm).}
+\item{ppm}{Numeric value specifying the mass tolerance in ppm for formula matching.}
 
-\item{legal_atom_counts}{A parameter specifying the legal atom counts.}
+\item{legal_atom_counts}{A data frame or list specifying constraints on element counts (min/max atoms for C, H, N, O, etc.).}
 
-\item{debug}{A logical value indicating whether to enable detailed debugging output.}
+\item{debug}{Logical indicating whether to enable detailed debugging output.}
 
 }
 \value{
-A data frame containing the results of the mass spectrometry analysis or data extraction.
+A data frame containing candidate molecular formulas with their calculated masses, mass errors, and element counts.
 }
 \details{
-This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to predict formula.
-The implementation is written in C++ for performance and exposed to R via Rcpp.
+This function is part of the Rcpp-based backend for the mzkit package. It uses combinatorial enumeration with chemical rules (e.g., valence constraints, nitrogen rule) to generate plausible formulas. This is useful for unknown compound identification. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

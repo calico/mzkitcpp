@@ -1,28 +1,27 @@
 \name{maldesi_create_modified_mzML}
 \alias{maldesi_create_modified_mzML}
-\title{Maldesi Create Modified Mzml}
+\title{Create Modified mzML File for MALDESI Data}
 \description{
-corresponding sections of the mzML file adjusted appropriately, so that mzML parsing programs can interpret the data correctly. Immediately precedes a binary block - in the next iteration, the mz array of the appropriate scan will be encoded into binary. the line is passed along into the output file. Immediately precedes a binary block - in the next iteration, the intensity array of the appropriate scan will be encoded into binary. the line is passed along into the output file. Find the appropriate scan for writing binary data, then pass the data along into the output file. values are written ...
+Creates a modified mzML file from MALDESI (Matrix Assisted Laser Desorption ElectroSpray Ionization) imaging data with adjusted scan parameters. This function modifies scan metadata and data arrays (m/z and intensity) according to specified parameters while maintaining valid mzML format, enabling compatibility with standard mzML parsing software.
 }
 \usage{
 maldesi_create_modified_mzML(sample_file, modified_sample_file, modification_params, verbose, debug)
 }
 \arguments{
-\item{sample_file}{A parameter specifying the sample file.}
+\item{sample_file}{Character string specifying the path to the original MALDESI mzML file.}
 
-\item{modified_sample_file}{A parameter specifying the modified sample file.}
+\item{modified_sample_file}{Character string specifying the path where the modified mzML file should be written.}
 
-\item{modification_params}{A parameter specifying the modification params.}
+\item{modification_params}{A list containing modification parameters such as mass calibration corrections, intensity scaling, scan filtering, or spatial binning.}
 
-\item{verbose}{A logical value indicating whether to print progress and informative messages.}
+\item{verbose}{Logical indicating whether to print progress and informative messages.}
 
-\item{debug}{A logical value indicating whether to enable detailed debugging output.}
+\item{debug}{Logical indicating whether to enable detailed debugging output.}
 
 }
 \value{
-This function does not return a value (void). It is typically called for its side effects, such as writing to a file.
+This function does not return a value (void). It writes the modified mzML file to disk as a side effect.
 }
 \details{
-This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to maldesi create modified mzml.
-The implementation is written in C++ for performance and exposed to R via Rcpp.
+This function is part of the Rcpp-based backend for the mzkit package. It processes the original mzML file scan-by-scan, applies modifications to m/z and intensity arrays, updates metadata sections, and writes the results in valid mzML format. This is useful for data preprocessing, calibration correction, or format standardization of MALDESI imaging data. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

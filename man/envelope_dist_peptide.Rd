@@ -1,8 +1,8 @@
 \name{envelope_dist_peptide}
 \alias{envelope_dist_peptide}
-\title{Envelope Dist Peptide}
+\title{Calculate Isotopic Envelope Distribution for Peptide}
 \description{
-* @brief Given a peptide sequence, return the exact mass. Scan information
+Calculates the isotopic envelope distribution for a peptide sequence. Returns the relative abundances of different isotopologs (M, M+1, M+2, etc.) based on natural isotope abundances.
 }
 \usage{
 envelope_dist_peptide(peptideSequence, threshold, debug)
@@ -10,15 +10,14 @@ envelope_dist_peptide(peptideSequence, threshold, debug)
 \arguments{
 \item{peptideSequence}{A character string specifying the peptide amino acid sequence.}
 
-\item{threshold}{A parameter specifying the threshold.}
+\item{threshold}{Numeric value specifying the minimum relative abundance threshold for including isotopologs (default: 1e-6).}
 
-\item{debug}{A logical value indicating whether to enable detailed debugging output.}
+\item{debug}{Logical indicating whether to enable detailed debugging output.}
 
 }
 \value{
-A data frame containing the results of the mass spectrometry analysis or data extraction.
+A data frame containing isotopolog masses and their relative abundances, filtered by the threshold.
 }
 \details{
-This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to envelope dist peptide.
-The implementation is written in C++ for performance and exposed to R via Rcpp.
+This function is part of the Rcpp-based backend for the mzkit package. It computes the isotopic envelope by considering natural isotope abundances of C, H, N, O, and S. This is useful for predicting isotope patterns and validating peptide identifications. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

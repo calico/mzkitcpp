@@ -10,64 +10,64 @@ remotes::install_github("calico/mzkitcpp", force=TRUE, build_vignettes=TRUE)
 ```
 
 # Functions
-- **DI_encoded_search_params**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_file_info**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_ms1_and_ms2_intensity**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_ms1_range_intensity**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_ms2_range_id**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_ms2_ranges**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_ms3_intensity**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_ms3_peakgroups_and_peaks**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_ms3_targets**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_ms_intensity**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_peakgroups_and_peaks**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_pipeline**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_pipeline_ms3_search**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_search_lib**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_slice_library**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_summarized_compounds**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **DI_unslice_library**: Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis.
-- **ISO_isotope_matrices**: R-facing functions
-- **adductize_exact_mass**: Given an exact mass and an adduct name, return the precursor m/z.
-- **adductize_formula**: Given a molecular formula and an adduct name, return the precursor m/z.
-- **adductize_peptide**: Given a peptide sequence and an adduct name, return the precursor m/z.
-- **envelope_dist_peptide**: Given a peptide sequence, return the exact mass.
-- **exact_mass**: Given a molecular formula, return the exact mass.
-- **exact_mass_peptide**: Given a peptide sequence, return the exact mass.
-- **expand_redundant_fragments_ms2_lib**: Given an MS2 library data frame containing redundant fragments, expand these redundant fragments into separate rows, with all other columns duplicated.
-- **expand_redundant_fragments_ms3_lib**: Given an MS3 library data frame containing redundant fragments, expand' these redundant fragments into separate rows, with all other columns duplicated.
-- **export_msp_lipids_library**: Given a DataFrame that originally derived from an imported msp library, write the contents of the DataFrame to an msp file.
-- **findFragPairsGreedyMz**: for debugging static void printArr(vector<pair < float,pair < int, int > > > arr);  @param library_peaks: list of m/zs corresponding to fragment spectra, ordered in increasing order @param exp_peaks: list of m/zs correspond to experimental spectra, ordered in increasing m/z @param maxMzDiffInAmu: maximum m/z difference between two fragments allowable for matching @param min_intensity_frag_exp: smallest allowable intensity fraction of max intensity for an experimental fragment.
-- **find_duplicate_peaks**: Given a merged dataframe of a peaks-formatted data frames of original peaks and re-picked peaks, return a list of peaks that are sufficiently similar to both.
-- **get_background_subtracted_scan_data**: Assume input scan number counts from 1 instead of 0 Scan information
-- **get_consensus_spectrum**: Mass spectrometry processing utility.
-- **get_eic**: Mass spectrometry processing utility.
-- **get_last_rts**: Mass spectrometry processing utility.
-- **get_ms2_scans**: samples_table is the data from the mzrollDB samples table.
-- **get_multi_file_consensus_spectrum**: Mass spectrometry processing utility.
-- **get_scan_data**: Assume input scan number counts from 1 instead of 0 Scan information
-- **get_scan_metadata**: Different scans may be different samples, so this must match exactly.
-- **get_standard_rts**: Mass spectrometry processing utility.
-- **groups_to_msp_library**: samples_table is the data from the mzrollDB samples table.
-- **import_msp_lipids_library**: Given an msp library, return a DataFrame containing relevant summary information output debugging
-- **lipidmaps_2020_compound_names**: Given an msp library, return a DataFrame containing relevant summary information
-- **loop_injections_to_msp_library**: metabolite_data is a data table that contains a path to a loop injection file, along with other columns with key information write information to msp file Ensure that this compound will not be recomputed again Determine which loop files may be bad close msp file, free memory
-- **maldesi_create_modified_mzML**: corresponding sections of the mzML file adjusted appropriately, so that mzML parsing programs can interpret the data correctly.
-- **maldesi_isotopic_envelope_finder**: clean up
-- **maldesi_search**: If a set of adducts are provided as an input parameter, this value is treated as an exact mass, from which theoretical m/z values are computed.
-- **mark_fragments_ms2_lib**: Given an MS2 library data frame containing redundant fragments, expand these redundant fragments into separate rows, with all other columns duplicated.
-- **match_id_candidates_rcpp**: This function is a reimplementation of the matching part of clamdb<matching.
-- **merge_split_groups**: Given a dataframe sorted by (groupId, sampleId), identify peakgroups that were split, and should be merged together (based on m/z and RT tolerance).
-- **monoiosotopic_mass**: Given a vector of string formulas, return a vector of compound monoisotopic masses.
-- **mzk_get_isotope_parameters**: Given various parameter values, return a formatted string as produced by IsotopeParameters::encode() isotope enumeration isotope extraction only consider max natural abundance error if the isIgnoreNaturalAbundance flag is TRUE - from MAVEN 1 diff iso specific
-- **mzk_get_lipid_parameters**: Given various source information, return a formatted string as produced by LCLipidSearchParameters::encode()
-- **name_summaries**: Given a vector of string formulas, return a vector of compound monoisotopic masses.
-- **peptide_sequence_to_formula**: Convert a peptide sequence to its molecular formula string.
-- **precursor_mass**: Given a vector of string formulas, return a vector of compound monoisotopic masses.
-- **predict_formula**: Given a vector of string formulas, return a vector of compound monoisotopic masses.
-- **qqq_peaks**: rt types quant types smoothed quant types Parameters always need to compute bounds to pass back complete information Samples rt types quant types smoothed quant types rt types quant types smoothed quant types rt types quant types smoothed quant types rt types quant types smoothed quant types
-- **record_set_to_msp_library**: metabolite_data is a data table that contains formatted metabolite records information (for use with DBv3).
-- **reextract_peaks**: clean up
-- **repick_peaks**: @param peaks_to_repick: DataFrame with instructions for repicking.
-- **smoothed_series**: Given a data vector and various other parameters, perform smoothing.
-- **update_rts**: Mass spectrometry processing utility.
+- **DI_encoded_search_params**: Encodes DI search parameters into a formatted string.
+- **DI_file_info**: Extracts file information and scan statistics from DI mzML files.
+- **DI_ms1_and_ms2_intensity**: Extracts MS1 precursor and MS2 fragment intensities for specified m/z values from DI samples.
+- **DI_ms1_range_intensity**: Extracts summed MS1 intensities within specified precursor m/z ranges.
+- **DI_ms2_range_id**: Identifies which MS2 isolation window range each precursor m/z belongs to.
+- **DI_ms2_ranges**: Extracts MS2 isolation window ranges from a DI mzML file.
+- **DI_ms3_intensity**: Extracts MS3 fragment intensities for specified MS1 precursor, MS2 precursor, and MS3 fragment m/z values (typically used for triacylglyceride analysis on ID-X tribrid instruments).
+- **DI_ms3_peakgroups_and_peaks**: Converts MS3 search results to peakgroup and peak table format for database storage.
+- **DI_ms3_targets**: Extracts MS3 target information (MS1 and MS2 precursor m/z pairs) from an mzML file.
+- **DI_ms_intensity**: Extracts intensities for specified m/z values at a given MS level from DI samples.
+- **DI_peakgroups_and_peaks**: Converts DI search results to peakgroup and peak table format for database storage.
+- **DI_pipeline**: Main pipeline for DI MS2 compound identification and quantification.
+- **DI_pipeline_ms3_search**: Pipeline for MS3 analysis, specifying both MS1 and MS2 precursor m/z values (typically for triacylglycerides on ID-X tribrid instruments).
+- **DI_search_lib**: Searches a spectral library against DI MS2 data for compound identification.
+- **DI_slice_library**: Partitions a spectral library by MS2 isolation window ranges for efficient searching.
+- **DI_summarized_compounds**: Summarizes compound identifications using parsimony and fragment evidence.
+- **DI_unslice_library**: Reverses library slicing to restore original library structure.
+- **ISO_isotope_matrices**: Generates isotope distribution matrices for specified compounds.
+- **adductize_exact_mass**: Calculates precursor m/z from an exact mass and adduct.
+- **adductize_formula**: Calculates precursor m/z from a molecular formula and adduct.
+- **adductize_peptide**: Calculates precursor m/z from a peptide sequence and adduct.
+- **envelope_dist_peptide**: Calculates the isotopic envelope distribution for a peptide sequence.
+- **exact_mass**: Calculates the exact (monoisotopic) mass from a molecular formula.
+- **exact_mass_peptide**: Calculates the exact (monoisotopic) mass from a peptide sequence.
+- **expand_redundant_fragments_ms2_lib**: Expands MS2 library entries containing redundant fragments into separate rows.
+- **expand_redundant_fragments_ms3_lib**: Expands MS3 library entries containing redundant fragments into separate rows.
+- **export_msp_lipids_library**: Writes a spectral library DataFrame to an MSP format file.
+- **findFragPairsGreedyMz**: (Deprecated) Matches library and experimental fragment m/z values using greedy algorithm.
+- **find_duplicate_peaks**: Identifies duplicate peaks between original and re-picked peak tables.
+- **get_background_subtracted_scan_data**: Retrieves scan data with background subtraction applied.
+- **get_consensus_spectrum**: Creates a consensus MS2 spectrum from multiple scans within a sample.
+- **get_eic**: Extracts an extracted ion chromatogram (EIC) for a specified m/z and RT range.
+- **get_last_rts**: Retrieves the final retention time from each sample file.
+- **get_ms2_scans**: Extracts MS2 scan information from sample files.
+- **get_multi_file_consensus_spectrum**: Creates a consensus MS2 spectrum from scans across multiple sample files.
+- **get_scan_data**: Retrieves m/z and intensity data for specified scan numbers.
+- **get_scan_metadata**: Retrieves metadata (RT, precursor m/z, MS level, etc.) for specified scans.
+- **get_standard_rts**: Retrieves retention times for internal standards across sample files.
+- **groups_to_msp_library**: Converts peakgroup/peak tables to MSP spectral library format.
+- **import_msp_lipids_library**: Imports an MSP format spectral library into a DataFrame.
+- **lipidmaps_2020_compound_names**: Processes compound names using LipidMaps 2020 nomenclature.
+- **loop_injections_to_msp_library**: Converts loop injection data to MSP spectral library format.
+- **maldesi_create_modified_mzML**: Creates a modified mzML file with adjusted scan parameters for MALDESI data.
+- **maldesi_isotopic_envelope_finder**: Identifies isotopic envelopes in MALDESI imaging mass spectrometry data.
+- **maldesi_search**: Searches for compounds in MALDESI imaging data using exact mass or adduct-based matching.
+- **mark_fragments_ms2_lib**: Marks specific fragments in an MS2 spectral library (e.g., as diagnostic ions).
+- **match_id_candidates_rcpp**: (Deprecated) Matches compound identification candidates based on m/z.
+- **merge_split_groups**: Identifies and merges peakgroups that were incorrectly split during peak detection.
+- **monoiosotopic_mass**: Calculates monoisotopic masses and adducted m/z values for molecular formulas.
+- **mzk_get_isotope_parameters**: Encodes isotope search parameters into a formatted string.
+- **mzk_get_lipid_parameters**: Encodes lipid search parameters into a formatted string.
+- **name_summaries**: Parses and standardizes compound names into structured components.
+- **peptide_sequence_to_formula**: Converts a peptide amino acid sequence to its molecular formula.
+- **precursor_mass**: Calculates precursor m/z values from molecular formulas and adducts.
+- **predict_formula**: Predicts possible molecular formulas from a measured m/z value.
+- **qqq_peaks**: Extracts and quantifies peaks from triple quadrupole (QQQ) mass spectrometry data.
+- **record_set_to_msp_library**: Converts formatted metabolite records to MSP spectral library format.
+- **reextract_peaks**: Re-extracts peak intensities from raw data using updated parameters.
+- **repick_peaks**: Re-picks peak boundaries and quantifies peaks using updated parameters.
+- **smoothed_series**: Applies smoothing algorithms to time series data.
+- **update_rts**: Updates retention times based on an alignment key.

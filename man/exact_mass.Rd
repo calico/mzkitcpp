@@ -1,22 +1,21 @@
 \name{exact_mass}
 \alias{exact_mass}
-\title{Exact Mass}
+\title{Calculate Exact Mass from Molecular Formula}
 \description{
-* @brief Given a molecular formula, return the exact mass.
+Calculates the exact (monoisotopic) mass from a molecular formula. The exact mass is computed using the most abundant isotope of each element.
 }
 \usage{
 exact_mass(formula, verbose)
 }
 \arguments{
-\item{formula}{A character vector of chemical formulas.}
+\item{formula}{A character string specifying a molecular formula (e.g., "C6H12O6").}
 
-\item{verbose}{A logical value indicating whether to print progress and informative messages.}
+\item{verbose}{Logical indicating whether to print progress and informative messages.}
 
 }
 \value{
-A numeric value representing the calculated mass, intensity, or other quantitative metric.
+A numeric value representing the exact (monoisotopic) mass in Daltons.
 }
 \details{
-This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to exact mass.
-The implementation is written in C++ for performance and exposed to R via Rcpp.
+This function is part of the Rcpp-based backend for the mzkit package. It parses molecular formulas and computes exact masses using atomic mass data. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

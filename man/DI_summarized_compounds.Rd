@@ -1,28 +1,27 @@
 \name{DI_summarized_compounds}
 \alias{DI_summarized_compounds}
-\title{Di Summarized Compounds}
+\title{Summarize Compound Identifications Using Parsimony}
 \description{
-Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. This function is exposed from C++ via Rcpp to provide fast mass spectrometry data processing.
+Summarizes compound identifications from direct infusion (DI) search results using parsimony principles and fragment evidence. When multiple compounds share fragments, this function applies parsimony algorithms to determine the most likely set of compounds present, avoiding over-reporting of structurally similar compounds that cannot be distinguished by the observed fragment patterns.
 }
 \usage{
 DI_summarized_compounds(di_search_results, search_lib, ms2_ranges, adducts_file, debug)
 }
 \arguments{
-\item{di_search_results}{A parameter specifying the di search results.}
+\item{di_search_results}{A data frame containing raw DI search results with compound matches and fragment scores.}
 
-\item{search_lib}{An object, list, or data frame containing the spectral library information.}
+\item{search_lib}{A list containing the spectral library with compound and fragment information.}
 
-\item{ms2_ranges}{A data frame or structure defining the m/z ranges for MS2 (tandem mass spectrometry) isolation windows.}
+\item{ms2_ranges}{A data frame defining MS2 isolation windows used in the analysis.}
 
-\item{adducts_file}{A character string specifying the path to a file containing definitions for chemical adducts.}
+\item{adducts_file}{Character string specifying the path to a file defining chemical adducts.}
 
-\item{debug}{A logical value indicating whether to enable detailed debugging output.}
+\item{debug}{Logical indicating whether to enable detailed debugging output.}
 
 }
 \value{
-A data frame containing the results of the mass spectrometry analysis or data extraction.
+A data frame containing summarized compound identifications with parsimony-based filtering and consolidated fragment evidence.
 }
 \details{
-This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to di summarized compounds.
-In the context of this package, 'DI' refers to Direct Infusion mass spectrometry, bypassing chromatographic separation. It specifically handles MS2 (tandem mass spectrometry) data, which involves fragment ion analysis. The implementation is written in C++ for performance and exposed to R via Rcpp.
+This function is part of the Rcpp-based backend for the mzkit package. Parsimony summarization is critical for lipid and metabolite identification, where many compounds share common fragment ions. The algorithm identifies the minimal set of compounds that explain the observed fragment pattern, reducing false positives from redundant identifications. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

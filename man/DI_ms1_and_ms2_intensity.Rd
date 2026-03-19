@@ -1,8 +1,8 @@
 \name{DI_ms1_and_ms2_intensity}
 \alias{DI_ms1_and_ms2_intensity}
-\title{Di Ms1 And Ms2 Intensity}
+\title{Extract MS1 Precursor and MS2 Fragment Intensities}
 \description{
-Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. This function is exposed from C++ via Rcpp to provide fast mass spectrometry data processing.
+Extracts MS1 precursor and MS2 fragment intensities for specified m/z values from direct infusion (DI) mass spectrometry samples. This function simultaneously retrieves both precursor ion intensities from MS1 scans and fragment ion intensities from MS2 scans, enabling coordinated analysis of precursor/fragment relationships.
 }
 \usage{
 DI_ms1_and_ms2_intensity(samples, ms1_mzs, ms2_mzs, ms1_ppm, ms2_ppm, ms1_scan_filter, scan_intensity_summary, ignore_empty, m_minus_one_intensity_threshold, m_minus_two_intensity_threshold, debug)
@@ -22,11 +22,11 @@ DI_ms1_and_ms2_intensity(samples, ms1_mzs, ms2_mzs, ms1_ppm, ms2_ppm, ms1_scan_f
 
 \item{scan_intensity_summary}{A character string indicating the method used to summarize intensities across multiple scans (e.g., 'mean', 'max', 'median').}
 
-\item{ignore_empty}{A parameter specifying the ignore empty.}
+\item{ignore_empty}{Logical indicating whether to skip scans with no signal (if FALSE, reports intensity as 0).}
 
-\item{m_minus_one_intensity_threshold}{A numeric value setting the intensity threshold for filtering or peak detection.}
+\item{m_minus_one_intensity_threshold}{Minimum intensity threshold for M-1 isotope peaks (for isotope validation).}
 
-\item{m_minus_two_intensity_threshold}{A numeric value setting the intensity threshold for filtering or peak detection.}
+\item{m_minus_two_intensity_threshold}{Minimum intensity threshold for M-2 isotope peaks (for isotope validation).}
 
 \item{debug}{A logical value indicating whether to enable detailed debugging output.}
 
@@ -35,6 +35,5 @@ DI_ms1_and_ms2_intensity(samples, ms1_mzs, ms2_mzs, ms1_ppm, ms2_ppm, ms1_scan_f
 A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to di ms1 and ms2 intensity.
-In the context of this package, 'DI' refers to Direct Infusion mass spectrometry, bypassing chromatographic separation. It specifically handles MS2 (tandem mass spectrometry) data, which involves fragment ion analysis. The implementation is written in C++ for performance and exposed to R via Rcpp.
+This function is part of the Rcpp-based backend for the mzkit package. It extracts intensities from both MS1 (precursor) and MS2 (fragment) scans, applying specified ppm tolerances and intensity summarization methods. The isotope thresholds help validate identifications by checking for expected isotope patterns. The implementation is written in C++ for performance and exposed to R via Rcpp.
 }

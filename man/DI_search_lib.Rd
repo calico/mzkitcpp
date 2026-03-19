@@ -1,8 +1,8 @@
 \name{DI_search_lib}
 \alias{DI_search_lib}
-\title{Di Search Lib}
+\title{Search Spectral Library Against DI Data}
 \description{
-Direct infusion mass spectrometry (DI) analysis pipeline function for MS/MS-all type DIMS analysis. R-facing functions
+Searches a spectral library against direct infusion (DI) MS2 data for compound identification. Matches library compounds based on MS1 precursor m/z and MS2 fragment patterns, extracting intensities and calculating match scores across all samples.
 }
 \usage{
 DI_search_lib(samples, mspLibrary, ms1_ppm, ms2_ppm, ms1_scan_filter, scan_intensity_summary, ignore_empty, m_minus_one_intensity_threshold, m_minus_two_intensity_threshold, debug)
@@ -20,7 +20,7 @@ DI_search_lib(samples, mspLibrary, ms1_ppm, ms2_ppm, ms1_scan_filter, scan_inten
 
 \item{scan_intensity_summary}{A character string indicating the method used to summarize intensities across multiple scans (e.g., 'mean', 'max', 'median').}
 
-\item{ignore_empty}{A parameter specifying the ignore empty.}
+\item{ignore_empty}{Logical indicating whether to skip scans with no signal (if FALSE, reports intensity as 0).}
 
 \item{m_minus_one_intensity_threshold}{A numeric value setting the intensity threshold for filtering or peak detection.}
 
@@ -33,6 +33,5 @@ DI_search_lib(samples, mspLibrary, ms1_ppm, ms2_ppm, ms1_scan_filter, scan_inten
 A data frame containing the results of the mass spectrometry analysis or data extraction.
 }
 \details{
-This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to di search lib.
-In the context of this package, 'DI' refers to Direct Infusion mass spectrometry, bypassing chromatographic separation. It specifically handles MS2 (tandem mass spectrometry) data, which involves fragment ion analysis. The implementation is written in C++ for performance and exposed to R via Rcpp.
+This function is part of the Rcpp-based backend for the mzkit package. It performs library searching against DI-MS2 data, matching compounds based on precursor m/z (within \code{ms1_ppm} tolerance) and extracting fragment intensities (within \code{ms2_ppm} tolerance). The \code{scan_intensity_summary} parameter controls how intensities are aggregated across scans (e.g., "topOne" for maximum intensity). The implementation is written in C++ for performance and exposed to R via Rcpp.
 }
