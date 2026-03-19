@@ -8,7 +8,7 @@ Extracts and quantifies chromatographic peaks from triple quadrupole (QQQ) mass 
 qqq_peaks(mzml_file, query_transitions, params, debug, verbose)
 }
 \arguments{
-\item{mzml_file}{Character string specifying the path to the mzML file containing QQQ/SRM/MRM data.}
+\item{mzml_file}{full system path to the mzML file containing QQQ/SRM/MRM data.}
 
 \item{query_transitions}{A data frame defining the SRM/MRM transitions to extract (precursor m/z, product m/z, collision energy, etc.).}
 

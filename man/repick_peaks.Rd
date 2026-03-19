@@ -2,7 +2,7 @@
 \alias{repick_peaks}
 \title{Repick Peaks}
 \description{
-* @brief @param peaks_to_repick: DataFrame with instructions for repicking. MUST BE SORTED by (sampleId, groupId) - otherwise, this function will not work. Initialize output columns peaks 1 peaks 2 peaks 3 RString type - note capital "S" in "String" Get max intensity peak fill out values peaks 1 peaks 2 peaks 3 prepare for next iteration
+Re-pick a set of peaks based on an input data frame. MUST BE SORTED by (sampleId, groupId) - otherwise, this function will not work.
 }
 \usage{
 repick_peaks(peaks_to_repick, encodedParams, verbose, debug)

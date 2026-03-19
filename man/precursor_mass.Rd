@@ -18,7 +18,7 @@ precursor_mass(formula, adduct, num_digits, debug)
 
 }
 \value{
-A data frame containing formulas, adducts, exact masses, and calculated precursor m/z values.
+A data frame containing formulas, adducts, and calculated precursor m/z values.
 }
 \details{
 This function is part of the Rcpp-based backend for the mzkit package. It handles various adduct types and accounts for charge states when computing m/z values. Useful for generating theoretical m/z values for library creation or compound matching. The implementation is written in C++ for performance and exposed to R via Rcpp.

@@ -2,13 +2,15 @@
 \alias{get_ms2_scans}
 \title{Get Ms2 Scans}
 \description{
-* @brief samples_table is the data from the mzrollDB samples table. This function only uses the columns for name, filename, and sample ID number.
+Function to retrieve all MS2 scans from all raw files and format as a table.
+Replaces the need to write all MS2 scan information into the mzrollDB SQLite database file,
+and pull out of the file.
 }
 \usage{
 get_ms2_scans(samples_table, ppm, dataLimit, debug)
 }
 \arguments{
-\item{samples_table}{A character vector of file paths to sample raw files (e.g., mzML files), where each file represents a single mass spectrometry injection.}
+\item{samples_table}{A dataframe that requires columns for name, filename, and sample ID number.}
 
 \item{ppm}{A numeric value specifying the mass tolerance in parts per million (ppm).}
 
@@ -18,7 +20,8 @@ get_ms2_scans(samples_table, ppm, dataLimit, debug)
 
 }
 \value{
-A data frame containing the results of the mass spectrometry analysis or data extraction.
+Returns the data contained the MS2 scans from all raw files in the \code{sample_dir}.
+This mimics a SQL call to an mzrollDB file, when the scans are saved to the file from peakdetector.
 }
 \details{
 This function is part of the Rcpp-based backend for the mzkit package. It performs operations related to get ms2 scans.

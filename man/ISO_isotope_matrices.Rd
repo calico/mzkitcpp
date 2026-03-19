@@ -8,7 +8,7 @@ Generates isotope distribution matrices for isotope labeling experiments by extr
 ISO_isotope_matrices(mzML_directory, sample_tbl, peak_tbl, group_tbl, unlabeled_samples, labeled_samples, params, debug)
 }
 \arguments{
-\item{mzML_directory}{Character string specifying the directory containing mzML sample files.}
+\item{mzML_directory}{directory containing full paths to mzML sample files.}
 
 \item{sample_tbl}{A data frame containing sample metadata (sample IDs, file names, experimental conditions).}
 

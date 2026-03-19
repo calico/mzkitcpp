@@ -1,6 +1,6 @@
 \name{monoiosotopic_mass}
 \alias{monoiosotopic_mass}
-\title{Calculate Monoisotopic Masses and Adducted m/z}
+\title{Calculate Monoisotopic Masses}
 \description{
 Calculates monoisotopic masses from molecular formulas and returns a data frame with computed mass values. Despite the function name, this also computes adducted m/z values for common adducts.
 }

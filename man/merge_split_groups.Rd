@@ -2,7 +2,7 @@
 \alias{merge_split_groups}
 \title{Merge Split Groups}
 \description{
-* @brief Given a dataframe sorted by (groupId, sampleId), identify peakgroups that were split, and should be merged together (based on m/z and RT tolerance). In cases where peak groups should be merged together, one peak group will consume all of the peaks. A record is kept of all of the original groups that were merged together. This can be passed back and handled separately. Return a dataframe of peak reassignments, mapping peakId to new groupIds. If a peakId is missing from this output, it is not reassigned. if a peakId is assigned to a groupId of -1, it should be dropped entirely. Assume t...
+Given a dataframe sorted by (groupId, sampleId), identify peakgroups that were split, and should be merged together (based on m/z and RT tolerance). In cases where peak groups should be merged together, one peak group will consume all of the peaks. A record is kept of all of the original groups that were merged together. This can be passed back and handled separately. Return a dataframe of peak reassignments, mapping peakId to new groupIds. If a peakId is missing from this output, it is not reassigned. if a peakId is assigned to a groupId of -1, it should be dropped entirely.
 }
 \usage{
 merge_split_groups(peaks, mz_tol, rt_tol, groupMergeOverlap, verbose, debug)

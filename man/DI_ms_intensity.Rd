@@ -26,6 +26,8 @@ DI_ms_intensity(samples, mzs, ppm, scan_filter, scan_intensity_summary, msLevel,
 
 \item{prec_mzs}{A numeric vector of precursor m/z values (required for MS2 level, ignored for MS1).}
 
+\item{debug}{flag to turn on or off additional debugging print messages.}
+
 }
 \value{
 A data frame containing the results of the mass spectrometry analysis or data extraction.
