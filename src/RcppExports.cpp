@@ -881,6 +881,73 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// SEC_get_trace
+DataFrame SEC_get_trace(const DataFrame& data, const List& parameters, const String& type, const bool& debug);
+RcppExport SEXP _mzkitcpp_SEC_get_trace(SEXP dataSEXP, SEXP parametersSEXP, SEXP typeSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const List& >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< const String& >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(SEC_get_trace(data, parameters, type, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SEC_cosine_scores
+DataFrame SEC_cosine_scores(const DataFrame& data, const List& parameters, const bool& debug);
+RcppExport SEXP _mzkitcpp_SEC_cosine_scores(SEXP dataSEXP, SEXP parametersSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const List& >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(SEC_cosine_scores(data, parameters, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SEC_peak_scores
+DataFrame SEC_peak_scores(const DataFrame& data, const List& parameters, const bool& debug);
+RcppExport SEXP _mzkitcpp_SEC_peak_scores(SEXP dataSEXP, SEXP parametersSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const List& >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(SEC_peak_scores(data, parameters, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SEC_diff_traces
+List SEC_diff_traces(const DataFrame& referenceData, const DataFrame& compareData, const List& parameters, const bool& debug);
+RcppExport SEXP _mzkitcpp_SEC_diff_traces(SEXP referenceDataSEXP, SEXP compareDataSEXP, SEXP parametersSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type referenceData(referenceDataSEXP);
+    Rcpp::traits::input_parameter< const DataFrame& >::type compareData(compareDataSEXP);
+    Rcpp::traits::input_parameter< const List& >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(SEC_diff_traces(referenceData, compareData, parameters, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SEC_peakgroups
+DataFrame SEC_peakgroups(const DataFrame& data, const List& parameters, const bool& debug);
+RcppExport SEXP _mzkitcpp_SEC_peakgroups(SEXP dataSEXP, SEXP parametersSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const List& >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(SEC_peakgroups(data, parameters, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_DI_ms2_ranges", (DL_FUNC) &_mzkitcpp_DI_ms2_ranges, 3},
@@ -942,6 +1009,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_merge_split_groups", (DL_FUNC) &_mzkitcpp_merge_split_groups, 6},
     {"_mzkitcpp_qqq_peaks", (DL_FUNC) &_mzkitcpp_qqq_peaks, 5},
     {"_mzkitcpp_update_rts", (DL_FUNC) &_mzkitcpp_update_rts, 4},
+    {"_mzkitcpp_SEC_get_trace", (DL_FUNC) &_mzkitcpp_SEC_get_trace, 4},
+    {"_mzkitcpp_SEC_cosine_scores", (DL_FUNC) &_mzkitcpp_SEC_cosine_scores, 3},
+    {"_mzkitcpp_SEC_peak_scores", (DL_FUNC) &_mzkitcpp_SEC_peak_scores, 3},
+    {"_mzkitcpp_SEC_diff_traces", (DL_FUNC) &_mzkitcpp_SEC_diff_traces, 4},
+    {"_mzkitcpp_SEC_peakgroups", (DL_FUNC) &_mzkitcpp_SEC_peakgroups, 3},
     {NULL, NULL, 0}
 };
 

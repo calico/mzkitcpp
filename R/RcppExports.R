@@ -237,3 +237,23 @@ update_rts <- function(rt_update_key, original_rts, sample_ids, debug = FALSE) {
     .Call(`_mzkitcpp_update_rts`, rt_update_key, original_rts, sample_ids, debug)
 }
 
+SEC_get_trace <- function(data, parameters, type = "PROTEIN", debug = FALSE) {
+    .Call(`_mzkitcpp_SEC_get_trace`, data, parameters, type, debug)
+}
+
+SEC_cosine_scores <- function(data, parameters, debug = FALSE) {
+    .Call(`_mzkitcpp_SEC_cosine_scores`, data, parameters, debug)
+}
+
+SEC_peak_scores <- function(data, parameters, debug = FALSE) {
+    .Call(`_mzkitcpp_SEC_peak_scores`, data, parameters, debug)
+}
+
+SEC_diff_traces <- function(referenceData, compareData, parameters, debug) {
+    .Call(`_mzkitcpp_SEC_diff_traces`, referenceData, compareData, parameters, debug)
+}
+
+SEC_peakgroups <- function(data, parameters, debug) {
+    .Call(`_mzkitcpp_SEC_peakgroups`, data, parameters, debug)
+}
+
