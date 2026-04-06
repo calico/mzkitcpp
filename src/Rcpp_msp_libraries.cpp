@@ -383,7 +383,8 @@ int export_msp_lipids_library(const String& mspLibraryPath,
   // This avoids the template error by being explicit about the arguments
   DataFrame sortedLibrary = arrange(mspLibrary,
                                     as_name("compoundName"),
-                                    as_name("adductName"));
+                                    as_name("adductName"),
+                                    as_name("ref_ms2_mz"));
 
   //start timer
   auto start = std::chrono::system_clock::now();
