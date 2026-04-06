@@ -396,7 +396,7 @@ int export_msp_lipids_library(const String& mspLibraryPath,
   //Issue 667: set precision in export to avoid rounding errors
   outputMspFileStream << std::fixed << setprecision(num_digits) << endl;
 
-  outputMspFileStream.open(sortedLibraryPath);
+  outputMspFileStream.open(mspLibraryPath);
 
   StringVector lipidClass = sortedLibrary["lipidClass"];
   StringVector compositionSummary = sortedLibrary["compositionSummary"];
