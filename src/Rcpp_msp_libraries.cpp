@@ -375,6 +375,14 @@ int export_msp_lipids_library(const String& mspLibraryPath,
                             int num_digits=7,
                             bool debug=false) {
 
+  // 1. Sort the DataFrame using dplyr::arrange
+  // We call R's 'arrange' from the dplyr namespace
+  Function arrange("arrange", Environment::namespace_env("dplyr"));
+
+  // Equivalent to: mspLibrary <- dplyr::arrange(mspLibrary, compoundName, adductName)
+  // Note: We use _["arg"] to specify the column symbols
+  DataFrame sortedLibrary = arrange(mspLibrary, _["compoundName"], _["adductName"]);
+
   //start timer
   auto start = std::chrono::system_clock::now();
 
@@ -386,43 +394,43 @@ int export_msp_lipids_library(const String& mspLibraryPath,
   //Issue 667: set precision in export to avoid rounding errors
   outputMspFileStream << std::fixed << setprecision(num_digits) << endl;
 
-  outputMspFileStream.open(mspLibraryPath);
+  outputMspFileStream.open(sortedLibraryPath);
 
-  StringVector lipidClass = mspLibrary["lipidClass"];
-  StringVector compositionSummary = mspLibrary["compositionSummary"];
-  StringVector chainLengthSummary = mspLibrary["chainLengthSummary"];
-  StringVector molecularFormula = mspLibrary["molecularFormula"];
-  NumericVector compoundMonoisotopicMass = mspLibrary["compoundMonoisotopicMass"];
-  StringVector compoundName = mspLibrary["compoundName"];
-  StringVector adductName = mspLibrary["adductName"];
-  StringVector fragmentLabel = mspLibrary["fragmentLabel"];
-  NumericVector ms1_mzs = mspLibrary["ref_ms1_mz"];
-  NumericVector ms2_mzs = mspLibrary["ref_ms2_mz"];
+  StringVector lipidClass = sortedLibrary["lipidClass"];
+  StringVector compositionSummary = sortedLibrary["compositionSummary"];
+  StringVector chainLengthSummary = sortedLibrary["chainLengthSummary"];
+  StringVector molecularFormula = sortedLibrary["molecularFormula"];
+  NumericVector compoundMonoisotopicMass = sortedLibrary["compoundMonoisotopicMass"];
+  StringVector compoundName = sortedLibrary["compoundName"];
+  StringVector adductName = sortedLibrary["adductName"];
+  StringVector fragmentLabel = sortedLibrary["fragmentLabel"];
+  NumericVector ms1_mzs = sortedLibrary["ref_ms1_mz"];
+  NumericVector ms2_mzs = sortedLibrary["ref_ms2_mz"];
 
   NumericVector ms2_intensity = NumericVector(lipidClass.size(), 1);
 
   if (observed_intensities) {
-    int ms2IntensityColIndex = mspLibrary.findName("ms2_intensity");
+    int ms2IntensityColIndex = sortedLibrary.findName("ms2_intensity");
     if (ms2IntensityColIndex != -1) {
-      ms2_intensity = mspLibrary[ms2IntensityColIndex];
+      ms2_intensity = sortedLibrary[ms2IntensityColIndex];
     }
   }
 
   //Issue 1185: Include RT information, if provided.
   NumericVector rts = NumericVector(lipidClass.size(), -1);
-  if (mspLibrary.containsElementNamed("RT")) {
-    rts = mspLibrary["RT"];
+  if (sortedLibrary.containsElementNamed("RT")) {
+    rts = sortedLibrary["RT"];
   }
 
   //Issue 1474: Include RT range information, if provided
   NumericVector rtMinVector = NumericVector(lipidClass.size(), -1);
-  if (mspLibrary.containsElementNamed("RT_min")) {
-    rtMinVector = mspLibrary["RT_min"];
+  if (sortedLibrary.containsElementNamed("RT_min")) {
+    rtMinVector = sortedLibrary["RT_min"];
   }
 
   NumericVector rtMaxVector = NumericVector(lipidClass.size(), -1);
-  if (mspLibrary.containsElementNamed("RT_max")) {
-    rtMaxVector = mspLibrary["RT_max"];
+  if (sortedLibrary.containsElementNamed("RT_max")) {
+    rtMaxVector = sortedLibrary["RT_max"];
   }
 
   string currentNameVal = "";
@@ -451,116 +459,116 @@ int export_msp_lipids_library(const String& mspLibraryPath,
 
       if (debug) Rcout << "write entry triggered";
 
-        String lipidClassR = lipidClass[startCoord];
-        String compositionSummaryR = compositionSummary[startCoord];
-        String chainLengthSummaryR = chainLengthSummary[startCoord];
-        double precursorMz = ms1_mzs[startCoord];
-        String molecularFormulaR = molecularFormula[startCoord];
-        double mw = compoundMonoisotopicMass[startCoord];
-        double rt = rts[startCoord];
-        double rtMin = rtMinVector[startCoord];
-        double rtMax = rtMaxVector[startCoord];
+      String lipidClassR = lipidClass[startCoord];
+      String compositionSummaryR = compositionSummary[startCoord];
+      String chainLengthSummaryR = chainLengthSummary[startCoord];
+      double precursorMz = ms1_mzs[startCoord];
+      String molecularFormulaR = molecularFormula[startCoord];
+      double mw = compoundMonoisotopicMass[startCoord];
+      double rt = rts[startCoord];
+      double rtMin = rtMinVector[startCoord];
+      double rtMax = rtMaxVector[startCoord];
 
-        unsigned int endCoord = i;
+      unsigned int endCoord = i;
 
-        /* Issue 478: Two possibilities for the last line in the file (i == compoundName.size()-1)
-         * (1) last line is a fragment that should be included with the previous compound
-         * (2) last line is a fragment associated with a new compound
-         */
-        bool isWriteLastLineToNewFragment = false;
-        if (i == compoundName.size()-1){ //last line
-          isWriteLastLineToNewFragment = compoundNameString != currentNameVal;
-          if (!isWriteLastLineToNewFragment) {
-            endCoord++; //write the last line fragment to previous compound
-          }
+      /* Issue 478: Two possibilities for the last line in the file (i == compoundName.size()-1)
+       * (1) last line is a fragment that should be included with the previous compound
+       * (2) last line is a fragment associated with a new compound
+       */
+      bool isWriteLastLineToNewFragment = false;
+      if (i == compoundName.size()-1){ //last line
+        isWriteLastLineToNewFragment = compoundNameString != currentNameVal;
+        if (!isWriteLastLineToNewFragment) {
+          endCoord++; //write the last line fragment to previous compound
+        }
+      }
+
+      int numPeaks = (endCoord-startCoord);
+
+      outputMspFileStream
+      << "Name: " << currentNameVal << "\n"
+      << "ID: " << currentNameVal << " " << currentAdductVal << "\n"
+      << "ADDUCT: " << currentAdductVal << "\n"
+      << "Formula: " << molecularFormulaR.get_cstring() << "\n"
+      << "PrecursorMz: " << precursorMz << "\n"
+      << "ExactMass: " << mw << "\n"
+      << "MW: " << mw << "\n"
+      << "CLASS: " << lipidClassR.get_cstring() << "\n"
+      << "SumComposition: " << compositionSummaryR.get_cstring() << "\n"
+      << "SumChainLengths: " << chainLengthSummaryR.get_cstring() << "\n";
+
+      if (rt > 0) {
+        outputMspFileStream << "RT: " << rt << "\n";
+      }
+
+      // Issue 1769: RT_MIN and RT_MAX values must surround rt value
+      if (rt > 0 && rtMin >= 0 && rtMax >= 0 && rtMin <= rt && rtMax >= rt) {
+        outputMspFileStream
+        << "RT_min: " << rtMin << "\n"
+        << "RT_max: " << rtMax << "\n";
+      }
+
+      outputMspFileStream << "NumPeaks: " << numPeaks << "\n";
+
+      for (unsigned int j = startCoord; j < endCoord; j++) {
+        String fragLabelR = fragmentLabel[j];
+
+        //default to constant intensity value
+        float intensityVal = 1.0f;
+
+        float possible_ms2_intensity_val = static_cast<float>(ms2_intensity[j]);
+        if (!NumericVector::is_na(possible_ms2_intensity_val) && possible_ms2_intensity_val > 0) {
+          intensityVal = possible_ms2_intensity_val;
         }
 
-        int numPeaks = (endCoord-startCoord);
+        outputMspFileStream
+        << ms2_mzs[j] << " "
+        << intensityVal << " "
+        << fragLabelR.get_cstring() << "\n";
+      }
+
+      outputMspFileStream << "\n\n";
+
+      //reset start counter to new start
+      startCoord = i;
+
+      if (isWriteLastLineToNewFragment) {
+
+        //default to constant intensity value
+        float intensityVal = 1.0f;
+
+        float possible_ms2_intensity_val = static_cast<float>(ms2_intensity[i]);
+        if (!NumericVector::is_na(possible_ms2_intensity_val) && possible_ms2_intensity_val > 0) {
+          intensityVal = possible_ms2_intensity_val;
+        }
 
         outputMspFileStream
-          << "Name: " << currentNameVal << "\n"
-          << "ID: " << currentNameVal << " " << currentAdductVal << "\n"
-          << "ADDUCT: " << currentAdductVal << "\n"
-          << "Formula: " << molecularFormulaR.get_cstring() << "\n"
-          << "PrecursorMz: " << precursorMz << "\n"
-          << "ExactMass: " << mw << "\n"
-          << "MW: " << mw << "\n"
-          << "CLASS: " << lipidClassR.get_cstring() << "\n"
-          << "SumComposition: " << compositionSummaryR.get_cstring() << "\n"
-          << "SumChainLengths: " << chainLengthSummaryR.get_cstring() << "\n";
+        << "Name: " << currentNameVal << "\n"
+        << "ID: " << currentNameVal << " " << currentAdductVal << "\n"
+        << "ADDUCT: " << currentAdductVal << "\n"
+        << "Formula: " << molecularFormulaR.get_cstring() << "\n"
+        << "PrecursorMz: " << precursorMz << "\n"
+        << "ExactMass: " << mw << "\n"
+        << "MW: " << mw << "\n"
+        << "CLASS: " << lipidClassR.get_cstring() << "\n"
+        << "SumComposition: " << compositionSummaryR.get_cstring() << "\n"
+        << "SumChainLengths: " << chainLengthSummaryR.get_cstring() << "\n";
 
         if (rt > 0) {
           outputMspFileStream << "RT: " << rt << "\n";
         }
-
-        // Issue 1769: RT_MIN and RT_MAX values must surround rt value
-        if (rt > 0 && rtMin >= 0 && rtMax >= 0 && rtMin <= rt && rtMax >= rt) {
+        if (rtMin >= 0 && rtMax >= 0) {
           outputMspFileStream
-            << "RT_min: " << rtMin << "\n"
-            << "RT_max: " << rtMax << "\n";
+          << "RT_min: " << rtMin << "\n"
+          << "RT_max: " << rtMax << "\n";
         }
 
-        outputMspFileStream << "NumPeaks: " << numPeaks << "\n";
+        outputMspFileStream << "NumPeaks: 1\n"
+                            << ms2_mzs[i] << " " << intensityVal << " " << fragmentLabel[i] << "\n"
+                            << "\n\n";
 
-        for (unsigned int j = startCoord; j < endCoord; j++) {
-          String fragLabelR = fragmentLabel[j];
-
-          //default to constant intensity value
-          float intensityVal = 1.0f;
-
-          float possible_ms2_intensity_val = static_cast<float>(ms2_intensity[j]);
-          if (!NumericVector::is_na(possible_ms2_intensity_val) && possible_ms2_intensity_val > 0) {
-            intensityVal = possible_ms2_intensity_val;
-          }
-
-          outputMspFileStream
-            << ms2_mzs[j] << " "
-            << intensityVal << " "
-            << fragLabelR.get_cstring() << "\n";
-        }
-
-        outputMspFileStream << "\n\n";
-
-        //reset start counter to new start
-        startCoord = i;
-
-        if (isWriteLastLineToNewFragment) {
-
-          //default to constant intensity value
-          float intensityVal = 1.0f;
-
-          float possible_ms2_intensity_val = static_cast<float>(ms2_intensity[i]);
-          if (!NumericVector::is_na(possible_ms2_intensity_val) && possible_ms2_intensity_val > 0) {
-            intensityVal = possible_ms2_intensity_val;
-          }
-
-          outputMspFileStream
-            << "Name: " << currentNameVal << "\n"
-            << "ID: " << currentNameVal << " " << currentAdductVal << "\n"
-            << "ADDUCT: " << currentAdductVal << "\n"
-            << "Formula: " << molecularFormulaR.get_cstring() << "\n"
-            << "PrecursorMz: " << precursorMz << "\n"
-            << "ExactMass: " << mw << "\n"
-            << "MW: " << mw << "\n"
-            << "CLASS: " << lipidClassR.get_cstring() << "\n"
-            << "SumComposition: " << compositionSummaryR.get_cstring() << "\n"
-            << "SumChainLengths: " << chainLengthSummaryR.get_cstring() << "\n";
-
-          if (rt > 0) {
-            outputMspFileStream << "RT: " << rt << "\n";
-          }
-          if (rtMin >= 0 && rtMax >= 0) {
-            outputMspFileStream
-            << "RT_min: " << rtMin << "\n"
-            << "RT_max: " << rtMax << "\n";
-          }
-
-          outputMspFileStream << "NumPeaks: 1\n"
-            << ms2_mzs[i] << " " << intensityVal << " " << fragmentLabel[i] << "\n"
-            << "\n\n";
-
-          if (debug) Rcout << " write last line as new compound";
-        }
+        if (debug) Rcout << " write last line as new compound";
+      }
     }
 
     currentNameVal = compoundNameString;

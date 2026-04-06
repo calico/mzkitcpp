@@ -17,7 +17,8 @@ Maintainer: Phillip Seitzer <phillipseitzer@calicolabs.com>
 Description: Fast C++ functions, including maven_core integrations
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: 
+Imports:
+    dplyr,
     Rcpp,
     BH
 LinkingTo: 
