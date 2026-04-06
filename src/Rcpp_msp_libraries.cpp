@@ -375,13 +375,15 @@ int export_msp_lipids_library(const String& mspLibraryPath,
                             int num_digits=7,
                             bool debug=false) {
 
-  // 1. Sort the DataFrame using dplyr::arrange
-  // We call R's 'arrange' from the dplyr namespace
+  // We need 'as.name' to turn strings into symbols dplyr can understand
+  Function as_name("as.name");
   Function arrange("arrange", Environment::namespace_env("dplyr"));
 
-  // Equivalent to: mspLibrary <- dplyr::arrange(mspLibrary, compoundName, adductName)
-  // Note: We use _["arg"] to specify the column symbols
-  DataFrame sortedLibrary = arrange(mspLibrary, _["compoundName"], _["adductName"]);
+  // Build the sorted library by calling the function with symbols
+  // This avoids the template error by being explicit about the arguments
+  DataFrame sortedLibrary = arrange(mspLibrary,
+                                    as_name("compoundName"),
+                                    as_name("adductName"));
 
   //start timer
   auto start = std::chrono::system_clock::now();
