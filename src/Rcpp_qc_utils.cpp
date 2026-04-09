@@ -323,23 +323,23 @@ DataFrame hrms_peaks(
   //initialize outputs
 
   // bookkeeping
-  input_mzMLFileName = StringVector(N, sample->mzSample);
-  input_hrmsQcSearchParameters = StringVector(N, hrmsQcParams);
+  StringVector input_mzMLFileName = StringVector(N, sample->sampleName);
+  StringVector input_hrmsQcSearchParameters = StringVector(N, hrmsQcParams);
 
   // measured values
-  output_observedMz = NumericVector(N);
-  output_observedRt = NumericVector(N);
-  output_peakAreaTop = NumericVector(N);
-  output_smoothedPeakAreaTop = NumericVector(N);
-  output_peakArea = NumericVector(N);
-  output_smoothedPeakArea = NumericVector(N);
-  output_peakAreaCorrected = NumericVector(N);
-  output_smoothedPeakAreaCorrected = NumericVector(N);
-  output_peakAreaFractional = NumericVector(N);
-  output_peakIntensity = NumericVector(N);
-  output_smoothedIntensity = NumericVector(N);
-  output_peakAreaFWHM = NumericVector(N);
-  output_smoothedPeakAreaFWHM = NumericVector(N);
+  NumericVector output_observedMz = NumericVector(N);
+  NumericVector output_observedRt = NumericVector(N);
+  NumericVector output_peakAreaTop = NumericVector(N);
+  NumericVector output_smoothedPeakAreaTop = NumericVector(N);
+  NumericVector output_peakArea = NumericVector(N);
+  NumericVector output_smoothedPeakArea = NumericVector(N);
+  NumericVector output_peakAreaCorrected = NumericVector(N);
+  NumericVector output_smoothedPeakAreaCorrected = NumericVector(N);
+  NumericVector output_peakAreaFractional = NumericVector(N);
+  NumericVector output_peakIntensity = NumericVector(N);
+  NumericVector output_smoothedIntensity = NumericVector(N);
+  NumericVector output_peakAreaFWHM = NumericVector(N);
+  NumericVector output_smoothedPeakAreaFWHM = NumericVector(N);
 
   for (unsigned int i = 0; i < standards_df.nrows(); i++) {
     //TODO: actual extraction
@@ -369,7 +369,7 @@ DataFrame hrms_peaks(
     Named("peakIntensity") = output_peakIntensity,
     Named("smoothedIntensity") = output_smoothedIntensity,
     Named("peakAreaFWHM") = output_peakAreaFWHM,
-    named("smoothedPeakAreaFWHM") = output_smoothedPeakAreaFWHM,
+    Named("smoothedPeakAreaFWHM") = output_smoothedPeakAreaFWHM,
 
     Named("stringsAsFactors") = false
   );
