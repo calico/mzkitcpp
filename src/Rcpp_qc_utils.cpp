@@ -323,8 +323,8 @@ DataFrame hrms_peaks(
   //initialize outputs
 
   // bookkeeping
-  StringVector input_mzMLFileName = StringVector(N, sample->sampleName);
-  StringVector input_hrmsQcSearchParameters = StringVector(N, hrmsQcParams);
+  StringVector input_mzMLFileName = StringVector(N, String(sample->sampleName));
+  StringVector input_hrmsQcSearchParameters = StringVector(N, String(hrmsQcParams->encodeParams()));
 
   // measured values
   NumericVector output_observedMz = NumericVector(N);
