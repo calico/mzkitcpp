@@ -10,9 +10,9 @@ remotes::install_github("calico/mzkitcpp", force=TRUE, build_vignettes=TRUE)
 ```
 # Version Changelog
 
-- 1.0.0: initial public release
-- 1.1.0: `rsecprofiler`-related functionality
-- 1.2.0: hrms qc app functionality
+- **1.0.0** initial public release
+- **1.1.0** `rsecprofiler`-related functionality
+- **1.2.0** hrms qc app functionality
 
 # Functions
 - **DI_encoded_search_params**: Encodes DI search parameters into a formatted string.
