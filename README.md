@@ -1,9 +1,9 @@
 # mzkitcpp
 mass spectrometry utility functions and processing algorithms written in C++, exposed in R package. 
 
-This package has a direct connection to [maven_core](https://github.com/eugenemel/maven_core) C++ library, and is the preferred library for wrapping [maven_core](https://github.com/eugenemel/maven_core) functionality into R.
+This package has a direct connection to <a href="https://github.com/eugenemel/maven_core" target="_blank">maven_core</a> C++ library, and is the preferred library for wrapping <a href="https://github.com/eugenemel/maven_core" target="_blank">maven_core</a> functionality into R.
 
-[maven_core](https://github.com/eugenemel/maven_core) implements all non-gui functionality associated with the [MAVEN GUI](https://github.com/eugenemel/maven/releases/latest) (see [maven repo](https://github.com/eugenemel/maven) for source code)
+<a href="https://github.com/eugenemel/maven_core" target="_blank">maven_core</a> implements all non-gui functionality associated with the <a href="https://github.com/eugenemel/maven/releases/latest" target="_blank">MAVEN GUI</a> (see <a href="https://github.com/eugenemel/maven" target="_blank">maven repo</a> for source code)
 
 # Installation
 Execute the following command in an R console:
