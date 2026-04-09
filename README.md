@@ -6,7 +6,7 @@ This package has a direct connection to [maven_core](https://github.com/eugeneme
 # Installation
 Execute the following command in an R console:
 ```
-remotes::install_github("calico/mzkitcpp", force=TRUE, build_vignettes=TRUE)
+remotes::install_github("calico/mzkitcpp", force=TRUE, build_vignettes=TRUE, upgrade="never")
 ```
 # Version Changelog
 
