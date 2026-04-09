@@ -8,6 +8,23 @@ Execute the following command in an R console:
 ```
 remotes::install_github("calico/mzkitcpp", force=TRUE, build_vignettes=TRUE, upgrade="never")
 ```
+
+# Local Development
+The package can be rebuilt locally during development, without needing to recompile every file.
+```
+pkg_dir <- "~/workspace/mzkitcpp"
+
+# need this for new functions, changes to function signatures
+Rcpp::compileAttributes(pkg_dir)
+
+# local install will deposit lots of ".o" files in the source folder
+install.packages(pkg_dir, type="source", repos=NULL)
+
+# remove .o and .so for clean rebuild (if necessary)
+clean_cpp_pkg <- glue::glue("rm -f {pkg_dir}/src/*.o {pkg_dir}/src/mzkitcpp.so")
+system(clean_cpp_pkg)
+```
+
 # Version Changelog
 
 - **1.0.0** initial public release
