@@ -867,6 +867,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// hrms_peaks
+DataFrame hrms_peaks(String& mzml_file, DataFrame& standards_df, List& params, bool debug, bool verbose);
+RcppExport SEXP _mzkitcpp_hrms_peaks(SEXP mzml_fileSEXP, SEXP standards_dfSEXP, SEXP paramsSEXP, SEXP debugSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< String& >::type mzml_file(mzml_fileSEXP);
+    Rcpp::traits::input_parameter< DataFrame& >::type standards_df(standards_dfSEXP);
+    Rcpp::traits::input_parameter< List& >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< bool >::type debug(debugSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(hrms_peaks(mzml_file, standards_df, params, debug, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // update_rts
 DataFrame update_rts(const DataFrame& rt_update_key, const NumericVector& original_rts, const IntegerVector& sample_ids, bool debug);
 RcppExport SEXP _mzkitcpp_update_rts(SEXP rt_update_keySEXP, SEXP original_rtsSEXP, SEXP sample_idsSEXP, SEXP debugSEXP) {
@@ -1008,6 +1023,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_find_duplicate_peaks", (DL_FUNC) &_mzkitcpp_find_duplicate_peaks, 6},
     {"_mzkitcpp_merge_split_groups", (DL_FUNC) &_mzkitcpp_merge_split_groups, 6},
     {"_mzkitcpp_qqq_peaks", (DL_FUNC) &_mzkitcpp_qqq_peaks, 5},
+    {"_mzkitcpp_hrms_peaks", (DL_FUNC) &_mzkitcpp_hrms_peaks, 5},
     {"_mzkitcpp_update_rts", (DL_FUNC) &_mzkitcpp_update_rts, 4},
     {"_mzkitcpp_SEC_get_trace", (DL_FUNC) &_mzkitcpp_SEC_get_trace, 4},
     {"_mzkitcpp_SEC_cosine_scores", (DL_FUNC) &_mzkitcpp_SEC_cosine_scores, 3},
