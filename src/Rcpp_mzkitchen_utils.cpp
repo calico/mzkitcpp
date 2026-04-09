@@ -206,6 +206,25 @@ shared_ptr<QQQSearchParameters> listToQQQSearchParameters(const List& params, bo
 
 /**
  * @brief
+ *    Given a list of parameter values, return a shared_ptr<HRMSQCSearchParameters>.
+ *    Used for the QC App.
+ */
+shared_ptr<HRMSQCSearchParameters> listToHRMSQCSearchParameters(const List& params, bool debug) {
+
+  shared_ptr<HRMSQCSearchParameters> hrmsQcSearchParams = shared_ptr<HRMSQCSearchParameters>(new HRMSQCSearchParameters());
+  hrmsQcSearchParams->peakPickingAndGroupingParameters = listToPeakPickingAndGroupingParameters(params, debug);
+
+  if (params.containsElementNamed("ms1PpmTolr")) {
+    hrmsQcSearchParams->ms1PpmTolr = params["ms1PpmTolr"];
+  }
+  if (params.containsElementNamed("rtTol")) {
+    hrmsQcSearchParams->rtTol = params["rtTol"];
+  }
+
+  return hrmsQcSearchParams;
+}
+/**
+ * @brief
  *    Given various parameter values, return a shared_ptr<PeakPickingAndGroupingParameters>.
  *    Not an exported function.
  */

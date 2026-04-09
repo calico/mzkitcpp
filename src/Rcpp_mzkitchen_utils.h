@@ -31,3 +31,4 @@ String mzk_get_isotope_parameters(const List& params, bool debug);
 shared_ptr<PeakPickingAndGroupingParameters> listToPeakPickingAndGroupingParameters(const List& params, bool debug);
 shared_ptr<QQQSearchParameters> listToQQQSearchParameters(const List& params, bool debug);
 shared_ptr<PeaksSearchParameters> listToPeaksSearchParams(const List& params, bool isUseSimpleDefaultValues, bool isApplyToMS1Scan, bool debug);
+shared_ptr<HRMSQCSearchParameters> listToHRMSQCSearchParameters(const List& params, bool debug);
