@@ -4143,6 +4143,10 @@ List DI_ms3_peakgroups_and_peaks(const DataFrame& ms3_search_results_no_frags,
    * END LAST ENTRY
    */
 
+  if (debug) {
+    Rcout << "Final groupIndexCounter=" << groupIndexCounter << ", expected num_peakgroups=" << num_peakgroups << endl;
+  }
+
   //outputs
 
   DataFrame peakgroups = DataFrame::create(
