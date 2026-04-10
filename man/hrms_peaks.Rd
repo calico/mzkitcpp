@@ -2,7 +2,7 @@
 \alias{hrms_peaks}
 \title{Extract and Quantify Peaks from LC-MS Data}
 \description{
-Extracts and quantifies chromatographic peaks from triple quadrupole (QQQ) mass spectrometry data. QQQ instruments use selected reaction monitoring (SRM) or multiple reaction monitoring (MRM) mode to measure specific precursor-to-fragment transitions. This function processes SRM/MRM data to detect peaks, integrate areas, and quantify compounds.
+Extracts and quantifies chromatographic peaks from LC-MS mass spectrometry data, given a list of standards ('standards_df' input argument). Note that the entire gradient is used for computing baseline values (relevant for signal:noise type calculations), but for actual peak extraction, the RT value coupled with RT tolerance is used to identify the correct peak from the observed data.
 }
 \usage{
 hrms_peaks(mzml_file, standards_df, params, debug, verbose)
