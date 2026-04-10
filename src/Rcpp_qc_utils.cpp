@@ -341,8 +341,59 @@ DataFrame hrms_peaks(
   NumericVector output_peakAreaFWHM = NumericVector(N);
   NumericVector output_smoothedPeakAreaFWHM = NumericVector(N);
 
+  double ms1PpmTolr = hrmsQcParams->ms1PpmTolr;
+  double rtTol = hrmsQcParams->rtTol;
+
   for (unsigned int i = 0; i < standards_df.nrows(); i++) {
-    //TODO: actual extraction
+
+    double expectedMz = input_expectedMz[i];
+    double expectedRt = input_expectedRt[i];
+
+    double maxMz = expectedMz * (1 + (ms1PpmTolr/1e6));
+    double minMz = expectedMz * (1 - (ms1PpmTolr/1e6));
+
+    double minRt = expectedRt - rtTol;
+    double maxRt = expectedRt + rtTol;
+
+    //Build EIC based on tight tolerances
+    EIC* eic = sample->getEIC(minMz, maxMz, minRt, maxRt, 1);
+
+    //Pick peaks based on parameters
+    eic->getPeakPositionsD(hrmsQcParams->peakPickingAndGroupingParameters, debug);
+
+    //Find highest intensity peak in RT tolerance
+    Peak maxIntensityPeak;
+    float maxIntensity = -1;
+    for (auto peak : eic->peaks) {
+      float intensity = eic->intensity[peak.pos];
+      if (intensity > maxIntensity) {
+        maxIntensityPeak = peak;
+        maxIntensity = intensity;
+      }
+    }
+
+    //Store results in vectors, if applicable
+    if (maxIntensity > 0){
+      output_observedMz[i] = maxIntensityPeak.peakMz;
+      output_observedRt[i] = maxIntensityPeak.rt;
+      output_peakAreaTop[i] = maxIntensityPeak.peakAreaTop;
+      output_smoothedPeakAreaTop[i] = maxIntensityPeak.smoothedPeakAreaTop;
+      output_peakArea[i] = maxIntensityPeak.peakArea;
+      output_smoothedPeakArea[i] = maxIntensityPeak.smoothedPeakArea;
+      output_peakAreaCorrected[i] = maxIntensityPeak.peakAreaCorrected;
+      output_smoothedPeakAreaCorrected[i] = maxIntensityPeak.smoothedPeakAreaCorrected;
+      output_peakAreaFractional[i] = maxIntensityPeak.peakAreaFractional;
+      output_peakIntensity[i] = maxIntensityPeak.peakIntensity;
+      output_smoothedIntensity[i] = maxIntensityPeak.smoothedIntensity;
+      output_peakAreaFWHM[i] = maxIntensityPeak.peakAreaFWHM;
+      output_smoothedPeakAreaFWHM[i] = maxIntensityPeak.smoothedPeakAreaFWHM;
+    }
+
+    //free memory
+    if (eic) {
+      delete(eic);
+      eic = nullptr;
+    }
   }
 
   //function inputs, reformatted in DF (19)
@@ -373,6 +424,12 @@ DataFrame hrms_peaks(
 
     Named("stringsAsFactors") = false
   );
+
+  // free memory
+  if (sample) {
+    delete(sample);
+    sample = nullptr;
+  }
 
   return df;
 }
