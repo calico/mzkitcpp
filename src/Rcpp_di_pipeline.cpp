@@ -4041,7 +4041,7 @@ List DI_ms3_peakgroups_and_peaks(const DataFrame& ms3_search_results_no_frags,
    */
 
   if (debug) {
-    Rcout << "Starting last entry." << endl;
+    Rcout << "Starting last entry." << "  Current groupId=" << groupId << ", groupIndexCounter=" << groupIndexCounter << endl;
   }
 
   //last target
@@ -4103,7 +4103,7 @@ List DI_ms3_peakgroups_and_peaks(const DataFrame& ms3_search_results_no_frags,
     int endPeakInfo = targetCoords.second;
     float numPeaks = static_cast<float>(endPeakInfo-startPeakInfo+1);
 
-    //if (debug) Rcout << "id=" << groupId <<", index=" << groupIndexCounter << ": " << tagString << endl;
+    if (debug) Rcout << "id=" << groupId <<", index=" << groupIndexCounter << ": " << tagString << endl;
 
     //write information
     peakgroups_groupIdVector[groupIndexCounter] = groupId;
