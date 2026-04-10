@@ -88,6 +88,7 @@ system(clean_cpp_pkg)
 - **precursor_mass**: Calculates precursor m/z values from molecular formulas and adducts.
 - **predict_formula**: Predicts possible molecular formulas from a measured m/z value.
 - **qqq_peaks**: Extracts and quantifies peaks from triple quadrupole (QQQ) mass spectrometry data.
+- **hrms_peaks**: Extracts and quantifies peaks from high-resolution liquid chromatography (HRMS) mass spectrometry data.
 - **record_set_to_msp_library**: Converts formatted metabolite records to MSP spectral library format.
 - **reextract_peaks**: Re-extracts peak intensities from raw data using updated parameters.
 - **repick_peaks**: Re-picks peak boundaries and quantifies peaks using updated parameters.
