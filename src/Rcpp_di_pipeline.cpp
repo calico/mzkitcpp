@@ -3357,6 +3357,10 @@ DataFrame getMultipleSampleMs3Output(const map<String, DataFrame>& allSampleResu
     }
   }
 
+  ms1_mzsOutput = round(ms1_mzsOutput, 4);
+  ms2_mzsOutput = round(ms2_mzsOutput, 4);
+  ms3_mzsOutput = round(ms3_mzsOutput, 4);
+
   //output
   DataFrame output = DataFrame::create(
 
