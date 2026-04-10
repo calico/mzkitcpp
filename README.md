@@ -21,8 +21,8 @@ Rcpp::compileAttributes(pkg_dir)
 install.packages(pkg_dir, type="source", repos=NULL)
 
 # remove .o and .so for clean rebuild (if necessary)
-clean_cpp_pkg <- glue::glue("rm -f {pkg_dir}/src/*.o {pkg_dir}/src/mzkitcpp.so")
-system(clean_cpp_pkg)
+# clean_cpp_pkg <- glue::glue("rm -f {pkg_dir}/src/*.o {pkg_dir}/src/mzkitcpp.so")
+# system(clean_cpp_pkg)
 ```
 
 # Version Changelog
