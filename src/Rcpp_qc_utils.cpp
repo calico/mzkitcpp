@@ -355,8 +355,8 @@ DataFrame hrms_peaks(
     double minRt = expectedRt - rtTol;
     double maxRt = expectedRt + rtTol;
 
-    //Build EIC based on tight tolerances
-    EIC* eic = sample->getEIC(minMz, maxMz, minRt, maxRt, 1);
+    //Build EIC based on m/z tolerance, using entire RT gradient for generous background calculation
+    EIC* eic = sample->getEIC(minMz, maxMz, 0, 1e7, 1);
 
     //Pick peaks based on parameters
     eic->getPeakPositionsD(hrmsQcParams->peakPickingAndGroupingParameters, debug);
@@ -365,10 +365,15 @@ DataFrame hrms_peaks(
     Peak maxIntensityPeak;
     float maxIntensity = -1;
     for (auto peak : eic->peaks) {
-      float intensity = eic->intensity[peak.pos];
-      if (intensity > maxIntensity) {
+
+      float peakIntensity = eic->intensity[peak.pos];
+      float peakRtMin = eic->rt[peak.minpos];
+      float peakRtMax = eic->rt[peak.maxpos];
+
+      // peak must be in the RT range to be a candidate
+      if (peakIntensity > maxIntensity && peakRtMin >= minRt && peakRtMax <= maxRt) {
         maxIntensityPeak = peak;
-        maxIntensity = intensity;
+        maxIntensity = peakIntensity;
       }
     }
 
