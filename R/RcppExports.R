@@ -233,8 +233,8 @@ qqq_peaks <- function(mzml_file, query_transitions, params, debug = FALSE, verbo
     .Call(`_mzkitcpp_qqq_peaks`, mzml_file, query_transitions, params, debug, verbose)
 }
 
-hrms_peaks <- function(mzml_file, standards_df, params, debug = FALSE, verbose = FALSE) {
-    .Call(`_mzkitcpp_hrms_peaks`, mzml_file, standards_df, params, debug, verbose)
+hrms_peaks <- function(mzml_file, standards_df, params, verbose = FALSE, debug = FALSE) {
+    .Call(`_mzkitcpp_hrms_peaks`, mzml_file, standards_df, params, verbose, debug)
 }
 
 update_rts <- function(rt_update_key, original_rts, sample_ids, debug = FALSE) {

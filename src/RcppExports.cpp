@@ -868,17 +868,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // hrms_peaks
-DataFrame hrms_peaks(String& mzml_file, DataFrame& standards_df, List& params, bool debug, bool verbose);
-RcppExport SEXP _mzkitcpp_hrms_peaks(SEXP mzml_fileSEXP, SEXP standards_dfSEXP, SEXP paramsSEXP, SEXP debugSEXP, SEXP verboseSEXP) {
+DataFrame hrms_peaks(String& mzml_file, DataFrame& standards_df, List& params, bool verbose, bool debug);
+RcppExport SEXP _mzkitcpp_hrms_peaks(SEXP mzml_fileSEXP, SEXP standards_dfSEXP, SEXP paramsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< String& >::type mzml_file(mzml_fileSEXP);
     Rcpp::traits::input_parameter< DataFrame& >::type standards_df(standards_dfSEXP);
     Rcpp::traits::input_parameter< List& >::type params(paramsSEXP);
-    Rcpp::traits::input_parameter< bool >::type debug(debugSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(hrms_peaks(mzml_file, standards_df, params, debug, verbose));
+    Rcpp::traits::input_parameter< bool >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(hrms_peaks(mzml_file, standards_df, params, verbose, debug));
     return rcpp_result_gen;
 END_RCPP
 }

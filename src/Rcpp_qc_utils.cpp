@@ -261,8 +261,8 @@ DataFrame hrms_peaks(
     String& mzml_file, //needs full file path
     DataFrame& standards_df, // must have 'compoundAdduct', 'expectedMz', 'expectedRt', and 'databaseVersion'
     List& params, // HRMSQCSearchParameters
-    bool debug = false,
-    bool verbose = false) {
+    bool verbose = false,
+    bool debug = false) {
 
   unsigned long N = standards_df.nrows();
 
