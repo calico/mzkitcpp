@@ -93,6 +93,9 @@ DataFrame maldesi_search(
   vector<int> match_numBound{};
   vector<float> match_envelopeIntensity{};
 
+  //Issue 1916: adjustments
+  vector<bool> match_isMaxAbundanceIsotope{};
+
   mzSample *sample = new mzSample();
   string filename = sample_file.get_cstring();
   sample->loadSample(filename.c_str());
@@ -458,6 +461,7 @@ DataFrame maldesi_search(
             match_isotopeCode.push_back(maldesiIonList.isotopeCode[ion]);
             match_isotopeNaturalAbundance.push_back(maldesiIonList.isotopeNaturalAbundance[ion]);
             match_numBound.push_back(maldesiIonList.numBound[ion]);
+            match_isMaxAbundanceIsotope.push_back(maldesiIonList.isMaxAbundanceIsotope[ion]);
 
             string key = maldesiIonList.adductName[ion] + "___" + to_string(maldesiIonList.numBound[ion]);
             if (envelopeIntensityMap.find(key) == envelopeIntensityMap.end()) {
@@ -524,6 +528,7 @@ DataFrame maldesi_search(
   NumericVector output_isotopeNaturalAbundance = wrap(match_isotopeNaturalAbundance);
   IntegerVector output_numBound = wrap(match_numBound);
   NumericVector output_envelopeIntensity = wrap(match_envelopeIntensity);
+  LogicalVector output_isMaxAbundanceIsotope = wrap(match_isMaxAbundanceIsotope);
 
   //print time message if verbose flag is set.
   auto end = std::chrono::system_clock::now();
@@ -565,6 +570,7 @@ DataFrame maldesi_search(
       Named("adduct") = output_adductName,
       Named("isotope") = output_isotopeCode,
       Named("natural_abundance") = output_isotopeNaturalAbundance,
+      Named("is_max_natural_abundance") = output_isMaxAbundanceIsotope,
       Named("num_ligand") = output_numBound,
       Named("envelopeIntensity") = output_envelopeIntensity,
 
