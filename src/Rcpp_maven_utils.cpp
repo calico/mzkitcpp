@@ -418,6 +418,7 @@ DataFrame get_scan_metadata(
     vector<double> match_basePeakIntensity{};
     vector<int> match_peaksCount{};
     vector<double> match_injectionTime{};
+    vector<int> match_msLevel{};
 
     mzSample *sample = new mzSample();
     string filename = sample_file.get_cstring();
@@ -447,6 +448,7 @@ DataFrame get_scan_metadata(
       match_basePeakIntensity.push_back(scan->basePeakIntensity);
       match_peaksCount.push_back(scan->nobs());
       match_injectionTime.push_back(scan->injectionTime);
+      match_msLevel.push_back(scan->mslevel);
     }
 
     int N = match_scan_num.size();
@@ -462,6 +464,7 @@ DataFrame get_scan_metadata(
     NumericVector output_basePeakIntensity = wrap(match_basePeakIntensity);
     IntegerVector output_peaksCount = wrap(match_peaksCount);
     NumericVector output_injectionTime = wrap(match_injectionTime);
+    IntegerVector output_mslevel = wrap(match_msLevel);
 
     //print time message if verbose flag is set.
     auto end = std::chrono::system_clock::now();
@@ -484,6 +487,7 @@ DataFrame get_scan_metadata(
       Named("basePeakIntensity") = output_basePeakIntensity,
       Named("peaksCount") = output_peaksCount,
       Named("injectionTime") = output_injectionTime,
+      Named("mslevel") = output_mslevel,
 
       _["stringsAsFactors"] = false);
 
