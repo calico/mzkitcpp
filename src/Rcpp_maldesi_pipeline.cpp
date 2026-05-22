@@ -327,7 +327,7 @@ DataFrame maldesi_search(
           }
 
         }
-      }
+      } // end scansToSearchStr
 
       int backgroundScanNum = input_backgroundScans[j];
 
@@ -389,6 +389,7 @@ DataFrame maldesi_search(
           Rcout << endl;
 
           Rcout << "\tboundLigandExactMass: " << boundLigandExactMass << endl;
+          Rcout << "\tminNumBoundLigand: " << minNumBoundLigand << endl;
           Rcout << "\tmaxNumBoundLigand: " << maxNumBoundLigand << endl;
           Rcout << "\tpeptidePredictedIsotopeRatioThreshold: " << peptidePredictedIsotopeRatioThreshold << endl;
           Rcout << "\tms1UseDaTol: " << ms1UseDaTol << endl;
