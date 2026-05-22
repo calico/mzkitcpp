@@ -286,6 +286,20 @@ DataFrame maldesi_search(
 
   }
 
+  map<pair<string, int>, shared_ptr<MaldesiParameters>> librarySetParams{};
+
+  // Build large map of (compoundName, scanNum)
+  // check the map for specific parameter overrides, otherwise fall back to provided params list
+
+  if (library.containsElementNamed("scan_params")) {
+    StringVector scan_params = library["scan_params"];
+
+    vector<string> compoundNameStrVector = Rcpp::as<vector<string>>(input_compound_name);
+    vector<string> encodedParamsVector = Rcpp::as<vector<string>>(scan_params);
+
+    librarySetParams = MaldesiParameters::decodeLibraryParamsSet(compoundNameStrVector, encodedParamsVector);
+  }
+
   for (unsigned int i = 0; i < sample->scans.size(); i++) {
 
     Scan *scan = sample->scans[i];
