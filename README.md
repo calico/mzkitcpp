@@ -30,6 +30,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **1.0.0** initial public release
 - **1.1.0** `rsecprofiler`-related functionality
 - **1.2.0** hrms qc app functionality
+- **1.3.0** maldesi enhancements for scan-specific
 
 # Functions
 - **DI_encoded_search_params**: Encodes DI search parameters into a formatted string.
