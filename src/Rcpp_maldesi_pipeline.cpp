@@ -203,6 +203,11 @@ DataFrame maldesi_search(
     boundLigandExactMass = search_params["boundLigandExactMass"];
   }
 
+  int minNumBoundLigand = 0;
+  if (search_params.containsElementNamed("minNumBoundLigand") && boundLigandExactMass > 0) {
+    minNumBoundLigand = search_params["minNumBoundLigand"];
+  }
+
   int maxNumBoundLigand = 0;
   if (search_params.containsElementNamed("maxNumBoundLigand") && boundLigandExactMass > 0) {
     maxNumBoundLigand = search_params["maxNumBoundLigand"];
@@ -382,6 +387,7 @@ DataFrame maldesi_search(
           peptide_sequence_str,
           adducts,
           boundLigandExactMass,
+          minNumBoundLigand,
           maxNumBoundLigand,
           peptidePredictedIsotopeRatioThreshold,
           ms1UseDaTol,
