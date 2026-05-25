@@ -33,24 +33,6 @@ using namespace std;
 
 #include "Rcpp_mzkitchen_utils.h"
 
-vector<int> getScansToSearch(const string& scansToSearchStr) {
-  vector<int> scans;
-  if (!scansToSearchStr.empty()) {
-    stringstream ss(scansToSearchStr);
-    string segment;
-    while (getline(ss, segment, ',')) {
-      try {
-        scans.push_back(stoi(segment));
-      } catch (const invalid_argument& e) {
-        Rcerr << "getScansToSearch(): Warning: Invalid input '" << segment << "'. Skipping." << endl;
-      } catch (const out_of_range& e) {
-        Rcerr << "getScansToSearch(): Warning: Input '" << segment << "' is out of range for integer. Skipping." << endl;
-      }
-    }
-  }
-  return scans;
-}
-
 // [[Rcpp::export]]
 DataFrame maldesi_search(
     const String& sample_file,
@@ -286,18 +268,32 @@ DataFrame maldesi_search(
 
   }
 
-  map<pair<string, int>, shared_ptr<MaldesiParameters>> librarySetParams{};
+  //Case - scans or scan_params are not provided at all:
+  //---> Process with the default parameters.
+  //Case - scans/scan_params is provided, but this particular compound does not have any scans
+  //---> compound is searched in every scan, with default parameters
+  // Case - scans/scan_params is provided, and this particular compound does have scans
+  //--> compound should be searched only for the scans that are provided
+  MaldesiLibraryParamsSet librarySetParams{};
 
   // Build large map of (compoundName, scanNum)
   // check the map for specific parameter overrides, otherwise fall back to provided params list
+  vector<string> compoundNameStrVector = Rcpp::as<vector<string>>(input_compound_name);
 
   if (library.containsElementNamed("scan_params")) {
     StringVector scan_params = library["scan_params"];
 
-    vector<string> compoundNameStrVector = Rcpp::as<vector<string>>(input_compound_name);
     vector<string> encodedParamsVector = Rcpp::as<vector<string>>(scan_params);
 
     librarySetParams = MaldesiParameters::decodeLibraryParamsSet(compoundNameStrVector, encodedParamsVector);
+
+  //fall back to 'scans' instead - will still work for presence/absence
+  } else if (library.containsElementNamed("scans")) {
+    StringVector scans = library["scans"];
+
+    vector<string> encodedScansVector = Rcpp::as<vector<string>>(scans);
+
+    librarySetParams = MaldesiParameters::decodeLibraryParamsSet(compoundNameStrVector, encodedScansVector);
   }
 
   for (unsigned int i = 0; i < sample->scans.size(); i++) {
@@ -305,29 +301,37 @@ DataFrame maldesi_search(
     Scan *scan = sample->scans[i];
 
     //MAVEN scan num is actually the spectrumIndex value, which starts at 0.
-    //Different scans may be different samples, so this must match exactly.
     int scanNum = scan->scannum+1;
 
     for (unsigned int j = 0; j < input_compound_mz.size(); j++) {
 
-      String scansToSearchRStr = input_scans[j];
-      string scansToSearchStr = string(scansToSearchRStr.get_cstring());
-      if (!scansToSearchStr.empty()) {
+      String compound_name = input_compound_name[j];
+      string compound_name_str = string(compound_name.get_cstring());
 
-        vector<int> scansToSearch = getScansToSearch(scansToSearchStr);
+      pair<string, int> compoundScanKey = make_pair(compound_name_str, scanNum);
 
-        if (!scansToSearch.empty()){
+      // if the compound does not have any scan-specific parameters, the compound should be searched for this scan.
+      // if the compound has any scan-specific parameters, check that the compound should be searched for this scan.
+      bool isSearchForCompoundInThisScan = true;
+      shared_ptr<MaldesiParameters> compoundScanSpecificParameters = shared_ptr<MaldesiParameters>(new MaldesiParameters());
 
-          //If the string can't be parsed, just ignore the argument
-          auto it = std::find(scansToSearch.begin(), scansToSearch.end(), scanNum);
-
-          // If the scan number is not in the list for this compound, move on
-          if (it == scansToSearch.end()) {
-            continue;
-          }
-
+      if (librarySetParams.compoundsWithScanSpecificParams.find(compound_name_str) != librarySetParams.compoundsWithScanSpecificParams.end()) {
+        if (librarySetParams.compoundScanSpecificParamsMap.find(compoundScanKey) != librarySetParams.compoundScanSpecificParamsMap.end()) {
+          compoundScanSpecificParameters = librarySetParams.compoundScanSpecificParamsMap[compoundScanKey];
+        } else {
+          //compounds are only disqualified from searching if the compound has scan-specific parameters for some scans, but not for this scan.
+          isSearchForCompoundInThisScan = false;
         }
-      } // end scansToSearchStr
+      }
+
+      if (!isSearchForCompoundInThisScan) {
+        continue;
+      }
+
+      const int compoundScanSpecificMinNumBoundLigand = compoundScanSpecificParameters->getMinNumBoundLigand(minNumBoundLigand);
+      const int compoundScanSpecificMaxNumBoundLigand = compoundScanSpecificParameters->getMaxNumBoundLigand(maxNumBoundLigand);
+      const double compoundScanSpecificBoundLigandExactMass = compoundScanSpecificParameters->getBoundLigandExactMass(boundLigandExactMass);
+      const vector<Adduct>& compoundScanSpecificAdducts = compoundScanSpecificParameters->getAdducts(adducts);
 
       int backgroundScanNum = input_backgroundScans[j];
 
@@ -358,9 +362,6 @@ DataFrame maldesi_search(
         }
       }
 
-      String compound_name = input_compound_name[j];
-      string compound_name_str = string(compound_name.get_cstring());
-
       double compoundMz = input_compound_mz[j];
 
       String molecular_formula = input_molecular_formula[j];
@@ -380,17 +381,17 @@ DataFrame maldesi_search(
           Rcout << "\tpeptideSequence: " << peptide_sequence_str << endl;
 
           Rcout << "\tadducts:";
-          for (unsigned int i = 0; i < adducts.size(); i++) {
+          for (unsigned int i = 0; i < compoundScanSpecificAdducts.size(); i++) {
             if (i > 0) {
               Rcout << ", ";
             }
-            Rcout << adducts.at(i).name;
+            Rcout << compoundScanSpecificAdducts.at(i).name;
           }
           Rcout << endl;
 
-          Rcout << "\tboundLigandExactMass: " << boundLigandExactMass << endl;
-          Rcout << "\tminNumBoundLigand: " << minNumBoundLigand << endl;
-          Rcout << "\tmaxNumBoundLigand: " << maxNumBoundLigand << endl;
+          Rcout << "\tboundLigandExactMass: " << compoundScanSpecificBoundLigandExactMass << endl;
+          Rcout << "\tminNumBoundLigand: " << compoundScanSpecificMinNumBoundLigand << endl;
+          Rcout << "\tmaxNumBoundLigand: " << compoundScanSpecificMaxNumBoundLigand << endl;
           Rcout << "\tpeptidePredictedIsotopeRatioThreshold: " << peptidePredictedIsotopeRatioThreshold << endl;
           Rcout << "\tms1UseDaTol: " << ms1UseDaTol << endl;
           Rcout << "\tms1PpmTol: " << ms1PpmTol << endl;
@@ -400,10 +401,10 @@ DataFrame maldesi_search(
         maldesiIonList = MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonList(
           molecular_formula_str,
           peptide_sequence_str,
-          adducts,
-          boundLigandExactMass,
-          minNumBoundLigand,
-          maxNumBoundLigand,
+          compoundScanSpecificAdducts,
+          compoundScanSpecificBoundLigandExactMass,
+          compoundScanSpecificMinNumBoundLigand,
+          compoundScanSpecificMaxNumBoundLigand,
           peptidePredictedIsotopeRatioThreshold,
           ms1UseDaTol,
           ms1PpmTol,
@@ -413,7 +414,7 @@ DataFrame maldesi_search(
       } else {
         maldesiIonList = MaldesiIonListGenerator::getMaldesiIonList(
           compoundMz,
-          adducts,
+          compoundScanSpecificAdducts,
           ms1UseDaTol,
           ms1PpmTol,
           ms1DaTol,
