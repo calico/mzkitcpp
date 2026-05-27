@@ -76,6 +76,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **lipidmaps_2020_compound_names**: Processes compound names using LipidMaps 2020 nomenclature.
 - **loop_injections_to_msp_library**: Converts loop injection data to MSP spectral library format.
 - **maldesi_create_modified_mzML**: Creates a modified mzML file with adjusted scan parameters for MALDESI data.
+- **maldesi_decode_params**: Decodes MALDESI parameter encodings into structured data frames, supporting both general and compound-specific parameter sets.
 - **maldesi_isotopic_envelope_finder**: Identifies isotopic envelopes in MALDESI imaging mass spectrometry data.
 - **maldesi_search**: Searches for compounds in MALDESI imaging data using exact mass or adduct-based matching.
 - **mark_fragments_ms2_lib**: Marks specific fragments in an MS2 spectral library (e.g., as diagnostic ions).

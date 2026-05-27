@@ -109,6 +109,10 @@ maldesi_create_modified_mzML <- function(sample_file, modified_sample_file, modi
     invisible(.Call(`_mzkitcpp_maldesi_create_modified_mzML`, sample_file, modified_sample_file, modification_params, verbose, debug))
 }
 
+maldesi_decode_params <- function(encoded_params, compound_adducts, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_maldesi_decode_params`, encoded_params, compound_adducts, verbose, debug)
+}
+
 smoothed_series <- function(data, types, windowSizes, debug = FALSE) {
     .Call(`_mzkitcpp_smoothed_series`, data, types, windowSizes, debug)
 }

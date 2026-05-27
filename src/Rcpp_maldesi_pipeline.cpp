@@ -992,3 +992,213 @@ void maldesi_create_modified_mzML(
     Rcout << "mzkitcpp::maldesi_create_modified_mzML() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
   }
 }
+
+// [[Rcpp::export]]
+DataFrame maldesi_decode_params(
+  const String& encoded_params,
+  const StringVector& compound_adducts,
+  const bool& verbose=true,
+  const bool& debug=false) {
+  /**
+   * examine the encoded_params string, and based on its contents decode it via
+   * MaldesiParameters::decode() (type 1)
+   * or MaldesiParameters::decodeCompoundSpecific() (type 2).
+   *
+   * In either case, return type is a DataFrame with 3 StringVector columns:
+   * compoundAdduct, name, and value, and 1 IntegerVector column, 'priority'.
+   *
+   * for type 1:
+   * produce a data frame with every compoundAdduct in the compound_adducts string.
+   * parameter names go in 'name' column, parameter values cast to strings go to 'value'.
+   * set the priority value to 2.
+   *
+   * for type 2:
+   * once again produce a data frame, but use only the compoundAdduct featured in
+   * encoded string. Make sure every compound referenced in that string is found in the provided
+   * compound_adducts string.
+   * from the compound adduct specific encodings where the compound adduct is contained
+   * in the input list, parameter names go in the name 'name' column, parameter values to 'value'.
+   * set the priority value to 1.
+   *
+   * Return the data frame, with strings as factors set to false.
+   */
+
+  string encodedParamsStr = string(encoded_params.get_cstring());
+
+  vector<string> output_compoundAdduct;
+  vector<string> output_name;
+  vector<string> output_value;
+  vector<int> output_priority;
+
+  // Convert compound_adducts to a set for efficient lookup
+  set<string> compoundAdductsSet;
+  for (unsigned int i = 0; i < compound_adducts.size(); i++) {
+    String compoundAdductRStr = compound_adducts[i];
+    string compoundAdductStr = string(compoundAdductRStr.get_cstring());
+    compoundAdductsSet.insert(compoundAdductStr);
+  }
+
+  // Determine if encoded string is compound-specific (type 2) or general (type 1)
+  // Compound-specific encoding contains pattern: <string>={
+  // where <string> is anything except 'adducts'
+  bool isCompoundParamsEncoding = false;
+
+  size_t pos = encodedParamsStr.find("={");
+  while (pos != string::npos) {
+    // Find the start of the identifier before ={
+    size_t identifierStart = pos;
+    while (identifierStart > 0 &&
+           (isalnum(encodedParamsStr[identifierStart - 1]) ||
+            encodedParamsStr[identifierStart - 1] == '_')) {
+      identifierStart--;
+    }
+
+    string identifier = encodedParamsStr.substr(identifierStart, pos - identifierStart);
+
+    // If we found an identifier that's not "adducts", it's compound-specific encoding
+    if (!identifier.empty() && identifier != "adducts") {
+      isCompoundParamsEncoding = true;
+      if (debug) {
+        Rcout << "Detected compound-specific encoding (found identifier: '"
+              << identifier << "={...}')" << endl;
+      }
+      break;
+    }
+
+    // Continue searching for more ={ patterns
+    pos = encodedParamsStr.find("={", pos + 1);
+  }
+
+  if (isCompoundParamsEncoding) {
+
+    map<string, shared_ptr<MaldesiParameters>> compoundParamsMap =
+      MaldesiParameters::decodeCompoundSpecific(encodedParamsStr);
+
+    // Type 2: Compound-specific parameters
+    if (verbose) {
+      Rcout << "Decoding as compound-specific parameters (type 2)" << endl;
+    }
+
+    for (auto it = compoundParamsMap.begin(); it != compoundParamsMap.end(); ++it) {
+      string compoundAdduct = it->first;
+      shared_ptr<MaldesiParameters> params = it->second;
+
+      // Check if this compound is in the provided list
+      if (compoundAdductsSet.find(compoundAdduct) == compoundAdductsSet.end()) {
+        if (verbose) {
+          Rcout << "Warning: Compound '" << compoundAdduct
+                << "' in encoded params not found in compound_adducts list. Skipping." << endl;
+        }
+        continue;
+      }
+
+      // Add minNumBoundLigand if set
+      if (params->minNumBoundLigand != -1) {
+        output_compoundAdduct.push_back(compoundAdduct);
+        output_name.push_back("minNumBoundLigand");
+        output_value.push_back(to_string(params->minNumBoundLigand));
+        output_priority.push_back(1);
+      }
+
+      // Add maxNumBoundLigand if set
+      if (params->maxNumBoundLigand != -1) {
+        output_compoundAdduct.push_back(compoundAdduct);
+        output_name.push_back("maxNumBoundLigand");
+        output_value.push_back(to_string(params->maxNumBoundLigand));
+        output_priority.push_back(1);
+      }
+
+      // Add boundLigandExactMass if set
+      if (params->boundLigandExactMass != -1.0) {
+        output_compoundAdduct.push_back(compoundAdduct);
+        output_name.push_back("boundLigandExactMass");
+        output_value.push_back(to_string(params->boundLigandExactMass));
+        output_priority.push_back(1);
+      }
+
+      // Add adducts if set
+      if (!params->adducts.empty()) {
+        string adductsStr = "";
+        for (unsigned int i = 0; i < params->adducts.size(); i++) {
+          if (i > 0) adductsStr += "&";
+          adductsStr += params->adducts[i].name;
+        }
+        output_compoundAdduct.push_back(compoundAdduct);
+        output_name.push_back("adducts");
+        output_value.push_back(adductsStr);
+        output_priority.push_back(1);
+      }
+    }
+
+  } else {
+    // Type 1: Single set of parameters for all compounds
+    if (verbose) {
+      Rcout << "Decoding as single parameter set (type 1)" << endl;
+    }
+
+    shared_ptr<MaldesiParameters> params = MaldesiParameters::decode(encodedParamsStr);
+
+    // Apply to all compounds in compound_adducts
+    for (unsigned int i = 0; i < compound_adducts.size(); i++) {
+      String compoundAdductRStr = compound_adducts[i];
+      string compoundAdduct = string(compoundAdductRStr.get_cstring());
+
+      // Add minNumBoundLigand if set
+      if (params->minNumBoundLigand != -1) {
+        output_compoundAdduct.push_back(compoundAdduct);
+        output_name.push_back("minNumBoundLigand");
+        output_value.push_back(to_string(params->minNumBoundLigand));
+        output_priority.push_back(2);
+      }
+
+      // Add maxNumBoundLigand if set
+      if (params->maxNumBoundLigand != -1) {
+        output_compoundAdduct.push_back(compoundAdduct);
+        output_name.push_back("maxNumBoundLigand");
+        output_value.push_back(to_string(params->maxNumBoundLigand));
+        output_priority.push_back(2);
+      }
+
+      // Add boundLigandExactMass if set
+      if (params->boundLigandExactMass != -1.0) {
+        output_compoundAdduct.push_back(compoundAdduct);
+        output_name.push_back("boundLigandExactMass");
+        output_value.push_back(to_string(params->boundLigandExactMass));
+        output_priority.push_back(2);
+      }
+
+      // Add adducts if set
+      if (!params->adducts.empty()) {
+        string adductsStr = "";
+        for (unsigned int j = 0; j < params->adducts.size(); j++) {
+          if (j > 0) adductsStr += "&";
+          adductsStr += params->adducts[j].name;
+        }
+        output_compoundAdduct.push_back(compoundAdduct);
+        output_name.push_back("adducts");
+        output_value.push_back(adductsStr);
+        output_priority.push_back(2);
+      }
+    }
+  }
+
+  if (debug) {
+    Rcout << "Output rows: " << output_compoundAdduct.size() << endl;
+    for (unsigned int i = 0; i < output_compoundAdduct.size(); i++) {
+      Rcout << "  " << output_compoundAdduct[i] << " | "
+            << output_name[i] << " | "
+            << output_value[i] << " | "
+            << output_priority[i] << endl;
+    }
+  }
+
+  DataFrame output = DataFrame::create(
+    Named("compoundAdduct") = wrap(output_compoundAdduct),
+    Named("name") = wrap(output_name),
+    Named("value") = wrap(output_value),
+    Named("priority") = wrap(output_priority),
+    _["stringsAsFactors"] = false
+  );
+
+  return output;
+}

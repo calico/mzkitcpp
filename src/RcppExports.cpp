@@ -437,6 +437,20 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// maldesi_decode_params
+DataFrame maldesi_decode_params(const String& encoded_params, const StringVector& compound_adducts, const bool& verbose, const bool& debug);
+RcppExport SEXP _mzkitcpp_maldesi_decode_params(SEXP encoded_paramsSEXP, SEXP compound_adductsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type encoded_params(encoded_paramsSEXP);
+    Rcpp::traits::input_parameter< const StringVector& >::type compound_adducts(compound_adductsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(maldesi_decode_params(encoded_params, compound_adducts, verbose, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
 // smoothed_series
 DataFrame smoothed_series(const NumericVector& data, const StringVector& types, const IntegerVector& windowSizes, bool debug);
 RcppExport SEXP _mzkitcpp_smoothed_series(SEXP dataSEXP, SEXP typesSEXP, SEXP windowSizesSEXP, SEXP debugSEXP) {
@@ -992,6 +1006,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_maldesi_search", (DL_FUNC) &_mzkitcpp_maldesi_search, 5},
     {"_mzkitcpp_maldesi_isotopic_envelope_finder", (DL_FUNC) &_mzkitcpp_maldesi_isotopic_envelope_finder, 4},
     {"_mzkitcpp_maldesi_create_modified_mzML", (DL_FUNC) &_mzkitcpp_maldesi_create_modified_mzML, 5},
+    {"_mzkitcpp_maldesi_decode_params", (DL_FUNC) &_mzkitcpp_maldesi_decode_params, 4},
     {"_mzkitcpp_smoothed_series", (DL_FUNC) &_mzkitcpp_smoothed_series, 4},
     {"_mzkitcpp_monoiosotopic_mass", (DL_FUNC) &_mzkitcpp_monoiosotopic_mass, 3},
     {"_mzkitcpp_precursor_mass", (DL_FUNC) &_mzkitcpp_precursor_mass, 4},
