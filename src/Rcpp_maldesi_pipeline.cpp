@@ -200,6 +200,11 @@ DataFrame maldesi_search(
     peptidePredictedIsotopeRatioThreshold = search_params["peptidePredictedIsotopeRatioThreshold"];
   }
 
+  bool requireSpecificParams = false;
+  if (search_params.containsElementNamed("requireSpecificParams")) {
+    requireSpecificParams = search_params["requireSpecificParams"];
+  }
+
   //background subtraction
   List backgroundSubtractionParams = List();
   double backgroundSubtractionPpmTol = 3.0;
@@ -318,8 +323,9 @@ DataFrame maldesi_search(
       if (librarySetParams.compoundsWithScanSpecificParams.find(compound_name_str) != librarySetParams.compoundsWithScanSpecificParams.end()) {
         if (librarySetParams.compoundScanSpecificParamsMap.find(compoundScanKey) != librarySetParams.compoundScanSpecificParamsMap.end()) {
           compoundScanSpecificParameters = librarySetParams.compoundScanSpecificParamsMap[compoundScanKey];
-        } else {
-          //compounds are only disqualified from searching if the compound has scan-specific parameters for some scans, but not for this scan.
+        } else if (requireSpecificParams) {
+          //compounds are only disqualified from searching if the compound has scan-specific parameters for some scans, but not for this scan,
+          // and the 'requireSpecificParams' flag is set to true.
           isSearchForCompoundInThisScan = false;
         }
       }
