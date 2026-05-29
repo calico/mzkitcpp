@@ -327,10 +327,18 @@ DataFrame maldesi_search(
           //compounds are only disqualified from searching if the compound has scan-specific parameters for some scans, but not for this scan,
           // and the 'requireSpecificParams' flag is set to true.
           isSearchForCompoundInThisScan = false;
+
+        // no compoundScanKey was found, but requireSpecificParams flag is false, fall back to search_params list
+        } else if (debug) {
+            Rcout << "scan #" << scanNum <<", compound " << compound_name_str << " will be searched using no scan or compound-specific parameters." << endl;
+          }
         }
       }
 
       if (!isSearchForCompoundInThisScan) {
+        if (debug) {
+          Rcout << "scan #" << scanNum << ", compound " << compound_name_str << " will not be searched." << endl;
+        }
         continue;
       }
 
