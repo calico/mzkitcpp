@@ -331,7 +331,6 @@ DataFrame maldesi_search(
         // no compoundScanKey was found, but requireSpecificParams flag is false, fall back to search_params list
         } else if (debug) {
             Rcout << "scan #" << scanNum <<", compound " << compound_name_str << " will be searched using no scan or compound-specific parameters." << endl;
-          }
         }
       }
 
