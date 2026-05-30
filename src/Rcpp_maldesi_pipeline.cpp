@@ -320,17 +320,33 @@ DataFrame maldesi_search(
       bool isSearchForCompoundInThisScan = true;
       shared_ptr<MaldesiParameters> compoundScanSpecificParameters = shared_ptr<MaldesiParameters>(new MaldesiParameters());
 
+      if (debug) {
+        Rcout << "(compound, scan) = (" << compound_name_str << ", " << scanNum << ")" << endl;
+      }
+
       if (librarySetParams.compoundsWithScanSpecificParams.find(compound_name_str) != librarySetParams.compoundsWithScanSpecificParams.end()) {
+
+        if (debug) {
+          Rcout << "compound " << compound_name_str << " has scan-specific parameters." << endl;
+        }
+
         if (librarySetParams.compoundScanSpecificParamsMap.find(compoundScanKey) != librarySetParams.compoundScanSpecificParamsMap.end()) {
           compoundScanSpecificParameters = librarySetParams.compoundScanSpecificParamsMap[compoundScanKey];
-        } else if (requireSpecificParams) {
+          if (debug) {
+            Rcout << "Retrieved (compound, scan)-specific parameters from librarySetParams.compoundScanSpecificParamsMap." << endl;
+          }
+        } else {
+          if (debug) {
+            Rcout << "Unable to retrieved (compound, scan)-specific parameters from librarySetParams.compoundScanSpecificParamsMap." << endl;
+          }
+
           //compounds are only disqualified from searching if the compound has scan-specific parameters for some scans, but not for this scan,
           // and the 'requireSpecificParams' flag is set to true.
-          isSearchForCompoundInThisScan = false;
+          isSearchForCompoundInThisScan = !requireSpecificParams;
 
-        // no compoundScanKey was found, but requireSpecificParams flag is false, fall back to search_params list
-        } else if (debug) {
-            Rcout << "scan #" << scanNum <<", compound " << compound_name_str << " will be searched using no scan or compound-specific parameters." << endl;
+          if (debug) {
+            Rcout << "requireSpecificParams=" << requireSpecificParams << ", isSearchForCompoundInThisScan=" << isSearchForCompoundInThisScan << endl;
+          }
         }
       }
 
@@ -339,6 +355,10 @@ DataFrame maldesi_search(
           Rcout << "scan #" << scanNum << ", compound " << compound_name_str << " will not be searched." << endl;
         }
         continue;
+      } else {
+        if (debug) {
+          Rcout << "scan #" << scanNum << ", compound " << compound_name_str << " will be searched." << endl;
+        }
       }
 
       const int compoundScanSpecificMinNumBoundLigand = compoundScanSpecificParameters->getMinNumBoundLigand(minNumBoundLigand);
