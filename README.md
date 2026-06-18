@@ -31,6 +31,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **1.1.0** `rsecprofiler`-related functionality
 - **1.2.0** hrms qc app functionality
 - **1.3.0** maldesi enhancements for scan-specific parameters
+- **1.4.0** add `combine_formulas()` utility method
 
 # Functions
 - **DI_encoded_search_params**: Encodes DI search parameters into a formatted string.
@@ -54,6 +55,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **adductize_exact_mass**: Calculates precursor m/z from an exact mass and adduct.
 - **adductize_formula**: Calculates precursor m/z from a molecular formula and adduct.
 - **adductize_peptide**: Calculates precursor m/z from a peptide sequence and adduct.
+- **combine_formulas**: Given a data frame with two columns of molecular formulas, return a dataframe with a third column containing the merged molecular formula.
 - **envelope_dist_peptide**: Calculates the isotopic envelope distribution for a peptide sequence.
 - **exact_mass**: Calculates the exact (monoisotopic) mass from a molecular formula.
 - **exact_mass_peptide**: Calculates the exact (monoisotopic) mass from a peptide sequence.
