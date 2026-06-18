@@ -55,7 +55,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **adductize_exact_mass**: Calculates precursor m/z from an exact mass and adduct.
 - **adductize_formula**: Calculates precursor m/z from a molecular formula and adduct.
 - **adductize_peptide**: Calculates precursor m/z from a peptide sequence and adduct.
-- **combine_formulas**: Given a data frame with two columns of molecular formulas, return a dataframe with a third column containing the merged molecular formula.
+- **combine_formulas**: Combines two columns of molecular formulas in a data frame by merging their elemental compositions (e.g., "C6H12O6" + "H2O" → "C6H14O7"). Returns a data frame with the original columns plus a new `combinedFormula` column.
 - **envelope_dist_peptide**: Calculates the isotopic envelope distribution for a peptide sequence.
 - **exact_mass**: Calculates the exact (monoisotopic) mass from a molecular formula.
 - **exact_mass_peptide**: Calculates the exact (monoisotopic) mass from a peptide sequence.

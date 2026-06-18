@@ -229,8 +229,19 @@ double exact_mass_peptide(const String& peptideSequence, bool verbose=false) {
 
 /**
  * @brief
- * given a dataframe containing two columns, each with properly formatted molecular formulas,
- * return a new dataframe with a third column with a new data fram combinign the oclumns
+ *    Combines two columns of molecular formulas by merging their elemental compositions.
+ *
+ * @param data_frame DataFrame containing columns with molecular formulas
+ * @param col1Name Name of the first formula column (default: "formula1")
+ * @param col2Name Name of the second formula column (default: "formula2")
+ * @param verbose Print execution time if true (default: false)
+ *
+ * @return DataFrame with original columns plus a new "combinedFormula" column
+ *
+ * @details
+ *    For each row, parses both molecular formulas into atomic compositions,
+ *    combines the atom counts, and converts back to a formula string.
+ *    Example: "C6H12O6" + "H2O" → "C6H14O7"
  */
 // [[Rcpp::export]]
 DataFrame combine_formulas(const DataFrame& data_frame, const String& col1Name = "formula1", const String& col2Name = "formula2", bool verbose = false) {
