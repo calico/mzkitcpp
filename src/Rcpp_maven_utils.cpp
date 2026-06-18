@@ -236,16 +236,32 @@ double exact_mass_peptide(const String& peptideSequence, bool verbose=false) {
  * @param col2Name Name of the second formula column (default: "formula2")
  * @param verbose Print execution time if true (default: false)
  *
- * @return DataFrame with original columns plus a new "combinedFormula" column
+ * @return DataFrame with original columns plus a new "combinedFormula" column,
+ *         or the original DataFrame if specified columns are not found
  *
  * @details
  *    For each row, parses both molecular formulas into atomic compositions,
  *    combines the atom counts, and converts back to a formula string.
  *    Example: "C6H12O6" + "H2O" → "C6H14O7"
+ *
+ *    Includes guards to check column existence. If either column is not found,
+ *    prints a message and returns the original DataFrame unchanged.
+ *    NA values are treated as empty strings during the combination process.
  */
 // [[Rcpp::export]]
 DataFrame combine_formulas(const DataFrame& data_frame, const String& col1Name = "formula1", const String& col2Name = "formula2", bool verbose = false) {
   auto start = std::chrono::system_clock::now();
+
+  // Check if columns exist in the data frame
+  if (!data_frame.containsElementNamed(col1Name)) {
+    Rcout << "Column '" << col1Name << "' not found in data frame. Returning original data frame." << endl;
+    return data_frame;
+  }
+
+  if (!data_frame.containsElementNamed(col2Name)) {
+    Rcout << "Column '" << col2Name << "' not found in data frame. Returning original data frame." << endl;
+    return data_frame;
+  }
 
   StringVector col1 = data_frame[col1Name];
   StringVector col2 = data_frame[col2Name];
@@ -254,10 +270,18 @@ DataFrame combine_formulas(const DataFrame& data_frame, const String& col1Name =
 
   for (unsigned int i = 0; i < col1.size(); i++) {
     String formula1Entry = col1[i];
-    string formula1String = string(formula1Entry.get_cstring());
-
     String formula2Entry = col2[i];
-    string formula2String = string(formula2Entry.get_cstring());
+
+    // Handle NA values by converting to empty strings
+    string formula1String = "";
+    if (formula1Entry != NA_STRING) {
+      formula1String = string(formula1Entry.get_cstring());
+    }
+
+    string formula2String = "";
+    if (formula2Entry != NA_STRING) {
+      formula2String = string(formula2Entry.get_cstring());
+    }
 
     map<string, int> atoms = MassCalculator::getComposition(formula1String);
     map<string, int> extra_atoms = MassCalculator::getComposition(formula2String);

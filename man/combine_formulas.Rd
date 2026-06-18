@@ -25,6 +25,8 @@ A data frame with the original formula columns plus a new column named "combined
 This function is part of the Rcpp-based backend for the mzkitcpp package. It uses the MassCalculator library to parse molecular formulas, combine elemental compositions, and generate the resulting formula string. The implementation is written in C++ for performance and exposed to R via Rcpp.
 
 The function combines formulas by adding together the atom counts from each formula. For example, combining "C6H12O6" (glucose) with "H2O" (water) produces "C6H14O7".
+
+The function includes guards to check if the specified column names exist in the data frame. If either column is not found, the function prints a message and returns the original data frame unchanged. NA values in formula columns are treated as empty strings during the combination process.
 }
 \examples{
 \dontrun{
