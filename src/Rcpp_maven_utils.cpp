@@ -229,6 +229,50 @@ double exact_mass_peptide(const String& peptideSequence, bool verbose=false) {
 
 /**
  * @brief
+ * given a dataframe containing two columns, each with properly formatted molecular formulas,
+ * return a new dataframe with a third column with a new data fram combinign the oclumns
+ */
+// [[Rcpp::export]]
+DataFrame combine_formulas(const DataFrame& data_frame, const String& col1Name = "formula1", const String& col2Name = "formula2", bool verbose = false) {
+  auto start = std::chrono::system_clock::now();
+
+  StringVector col1 = data_frame[col1Name];
+  StringVector col2 = data_frame[col2Name];
+
+  StringVector combinedFormulas = StringVector(col1.size());
+
+  for (unsigned int i = 0; i < col1.size(); i++) {
+    String formula1Entry = col1[i];
+    string formula1String = string(formula1Entry.get_cstring());
+
+    String formula2Entry = col2[i];
+    string formula2String = string(formula2Entry.get_cstring());
+
+    map<string, int> atoms = MassCalculator::getComposition(formula1String);
+    map<string, int> extra_atoms = MassCalculator::getComposition(formula2String);
+
+    MassCalculator::addAtoms(atoms, extra_atoms);
+
+    string combinedFormula = MassCalculator::atomMapToFormula(atoms);
+
+    combinedFormulas[i] = combinedFormula;
+  }
+
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) Rcout << "mzkitcpp::combine_formulas() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+
+  DataFrame output = DataFrame::create(
+    Named(col1Name) = col1,
+    Named(col2Name) = col2,
+    Named("combinedFormula") = combinedFormulas,
+    _["stringsAsFactors"] = false);
+
+  return output;
+}
+
+/**
+ * @brief
  *    Given a peptide sequence, return the exact mass.
  */
 // [[Rcpp::export]]

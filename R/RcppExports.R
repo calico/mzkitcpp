@@ -133,6 +133,10 @@ exact_mass_peptide <- function(peptideSequence, verbose = FALSE) {
     .Call(`_mzkitcpp_exact_mass_peptide`, peptideSequence, verbose)
 }
 
+combine_formulas <- function(data_frame, col1Name = "formula1", col2Name = "formula2", verbose = FALSE) {
+    .Call(`_mzkitcpp_combine_formulas`, data_frame, col1Name, col2Name, verbose)
+}
+
 envelope_dist_peptide <- function(peptideSequence, threshold = 1e-6, debug = FALSE) {
     .Call(`_mzkitcpp_envelope_dist_peptide`, peptideSequence, threshold, debug)
 }

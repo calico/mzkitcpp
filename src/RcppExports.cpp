@@ -516,6 +516,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// combine_formulas
+DataFrame combine_formulas(const DataFrame& data_frame, const String& col1Name, const String& col2Name, bool verbose);
+RcppExport SEXP _mzkitcpp_combine_formulas(SEXP data_frameSEXP, SEXP col1NameSEXP, SEXP col2NameSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type data_frame(data_frameSEXP);
+    Rcpp::traits::input_parameter< const String& >::type col1Name(col1NameSEXP);
+    Rcpp::traits::input_parameter< const String& >::type col2Name(col2NameSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(combine_formulas(data_frame, col1Name, col2Name, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // envelope_dist_peptide
 DataFrame envelope_dist_peptide(const String& peptideSequence, double threshold, bool debug);
 RcppExport SEXP _mzkitcpp_envelope_dist_peptide(SEXP peptideSequenceSEXP, SEXP thresholdSEXP, SEXP debugSEXP) {
@@ -1012,6 +1026,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_precursor_mass", (DL_FUNC) &_mzkitcpp_precursor_mass, 4},
     {"_mzkitcpp_exact_mass", (DL_FUNC) &_mzkitcpp_exact_mass, 2},
     {"_mzkitcpp_exact_mass_peptide", (DL_FUNC) &_mzkitcpp_exact_mass_peptide, 2},
+    {"_mzkitcpp_combine_formulas", (DL_FUNC) &_mzkitcpp_combine_formulas, 4},
     {"_mzkitcpp_envelope_dist_peptide", (DL_FUNC) &_mzkitcpp_envelope_dist_peptide, 3},
     {"_mzkitcpp_adductize_exact_mass", (DL_FUNC) &_mzkitcpp_adductize_exact_mass, 3},
     {"_mzkitcpp_adductize_formula", (DL_FUNC) &_mzkitcpp_adductize_formula, 3},
