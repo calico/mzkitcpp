@@ -252,19 +252,26 @@ double exact_mass_peptide(const String& peptideSequence, bool verbose=false) {
 DataFrame combine_formulas(const DataFrame& data_frame, const String& col1Name = "formula1", const String& col2Name = "formula2", bool verbose = false) {
   auto start = std::chrono::system_clock::now();
 
+  string col1NameStr = col1Name.get_cstring();
+  string col2NameStr = col2Name.get_cstring();
+
   // Check if columns exist in the data frame
-  if (!data_frame.containsElementNamed(col1Name)) {
-    Rcout << "Column '" << col1Name << "' not found in data frame. Returning original data frame." << endl;
+  if (!data_frame.containsElementNamed(col1NameStr.c_str())) {
+    if (verbose) {
+      Rcout << "Column '" << col1NameStr << "' not found in data frame. Returning original data frame." << endl;
+    }
     return data_frame;
   }
 
-  if (!data_frame.containsElementNamed(col2Name)) {
-    Rcout << "Column '" << col2Name << "' not found in data frame. Returning original data frame." << endl;
+  if (!data_frame.containsElementNamed(col2NameStr.c_str())) {
+    if (verbose) {
+      Rcout << "Column '" << col2NameStr << "' not found in data frame. Returning original data frame." << endl;
+    }
     return data_frame;
   }
 
-  StringVector col1 = data_frame[col1Name];
-  StringVector col2 = data_frame[col2Name];
+  StringVector col1 = data_frame[col1NameStr.c_str()];
+  StringVector col2 = data_frame[col2NameStr.c_str()];
 
   StringVector combinedFormulas = StringVector(col1.size());
 
