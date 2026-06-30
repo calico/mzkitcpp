@@ -978,12 +978,9 @@ DataFrame get_pressure_trace(
 
   auto start = std::chrono::system_clock::now();
 
-  //print time message if verbose flag is set.
-  auto end = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = end-start;
-  if (verbose) {
-    Rcout << "mzkitcpp::get_scan_data() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
-  }
+  //initialize arrays
+  vector<float> timeVector{};
+  vector<float> intsVector{};
 
   string filename = string(sample_file.get_cstring());
 
@@ -997,15 +994,63 @@ DataFrame get_pressure_trace(
     return DataFrame::create();
   }
 
-  // xml_node pressureTrace = doc.first_child().first_element_by_path("mzML/run/chromatogramList")
+  xml_node chromatogramList = doc.first_child().first_element_by_path("mzML/run/chromatogramList");
 
-  // TODO
+  for (xml_node chromatogram = chromatogramList.child("chromatogram"); chromatogram; chromatogram = chromatogram.next_sibling("chromatogram")) {
+    map<string,string> chromatrogramAttr = mzSample::mzML_cvParams(chromatogram);
+
+    // looking at the correct node, the one which contains the pressure chromatogram
+    if (chromatrogramAttr.find("pressure chromatogram") != chromatrogramAttr.end()) {
+      xml_node binaryDataArrayList = chromatogram.child("binaryDataArrayList");
+
+      //iterate through all encoded binary data
+      for(xml_node binaryDataArray= binaryDataArrayList.child("binaryDataArray"); binaryDataArray; binaryDataArray=binaryDataArray.next_sibling("binaryDataArray")) {
+        map<string,string> attr = mzSample::mzML_cvParams(binaryDataArray);
+
+        int precision = 64;
+        if (attr.find("32-bit float") != attr.end()){
+          precision=32;
+        }
+
+        bool decompress = false;
+        if (attr.find("zlib compression") != attr.end()){
+          decompress = true;
+        }
+
+        string binaryDataStr = binaryDataArray.child("binary").child_value();
+        vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false,decompress);
+
+        if (attr.find("time array") != attr.end()) {
+          timeVector = binaryData;
+        }
+
+        if( attr.find("intensity array") != attr.end()) {
+          intsVector = binaryData;
+        }
+      } // end for loop encoded binary data
+
+      break;
+
+    } // end found pressure chromatogram
+  } // end for loop
+
+  NumericVector rtVec = wrap(timeVector);
+  NumericVector intensityVec = wrap(intsVector);
+
   DataFrame output = DataFrame::create(
 
-    Named("TODO") = StringVector(),
+    Named("rt") = rtVec,
+    Named("intensity") = intensityVec,
 
     _["stringsAsFactors"] = false
   );
+
+  //print time message if verbose flag is set.
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) {
+    Rcout << "mzkitcpp::get_pressure_trace() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  }
 
   return output;
 }
