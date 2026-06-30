@@ -185,6 +185,10 @@ predict_formula <- function(mz, adduct, ppm = 10.0, legal_atom_counts = NULL, de
     .Call(`_mzkitcpp_predict_formula`, mz, adduct, ppm, legal_atom_counts, debug)
 }
 
+get_pressure_trace <- function(sample_file, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_get_pressure_trace`, sample_file, verbose, debug)
+}
+
 import_msp_lipids_library <- function(mspLibraryPath, totalNumFragments = -1L, is_include_SMILES = FALSE, is_reformat_to_lipidmaps_2020 = FALSE, num_digits = 7L, is_prefer_file_summarizations = FALSE, debug = FALSE) {
     .Call(`_mzkitcpp_import_msp_lipids_library`, mspLibraryPath, totalNumFragments, is_include_SMILES, is_reformat_to_lipidmaps_2020, num_digits, is_prefer_file_summarizations, debug)
 }

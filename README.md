@@ -32,6 +32,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **1.2.0** hrms qc app functionality
 - **1.3.0** maldesi enhancements for scan-specific parameters
 - **1.4.0** add `combine_formulas()` utility method
+- **1.5.0** added `get_pressure_trace()` utility method
 
 # Functions
 - **DI_encoded_search_params**: Encodes DI search parameters into a formatted string.
@@ -70,6 +71,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **get_last_rts**: Retrieves the final retention time from each sample file.
 - **get_ms2_scans**: Extracts MS2 scan information from sample files.
 - **get_multi_file_consensus_spectrum**: Creates a consensus MS2 spectrum from scans across multiple sample files.
+- **get_pressure_trace**: Return pressure trace information from a single mzML file.
 - **get_scan_data**: Retrieves m/z and intensity data for specified scan numbers.
 - **get_scan_metadata**: Retrieves metadata (RT, precursor m/z, MS level, etc.) for specified scans.
 - **get_standard_rts**: Retrieves retention times for internal standards across sample files.

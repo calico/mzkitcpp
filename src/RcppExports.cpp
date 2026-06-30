@@ -692,6 +692,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_pressure_trace
+DataFrame get_pressure_trace(const String& sample_file, const bool& verbose, const bool& debug);
+RcppExport SEXP _mzkitcpp_get_pressure_trace(SEXP sample_fileSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const String& >::type sample_file(sample_fileSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_pressure_trace(sample_file, verbose, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
 // import_msp_lipids_library
 DataFrame import_msp_lipids_library(const String& mspLibraryPath, long totalNumFragments, bool is_include_SMILES, bool is_reformat_to_lipidmaps_2020, int num_digits, bool is_prefer_file_summarizations, bool debug);
 RcppExport SEXP _mzkitcpp_import_msp_lipids_library(SEXP mspLibraryPathSEXP, SEXP totalNumFragmentsSEXP, SEXP is_include_SMILESSEXP, SEXP is_reformat_to_lipidmaps_2020SEXP, SEXP num_digitsSEXP, SEXP is_prefer_file_summarizationsSEXP, SEXP debugSEXP) {
@@ -1039,6 +1052,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_get_multi_file_consensus_spectrum", (DL_FUNC) &_mzkitcpp_get_multi_file_consensus_spectrum, 4},
     {"_mzkitcpp_get_background_subtracted_scan_data", (DL_FUNC) &_mzkitcpp_get_background_subtracted_scan_data, 5},
     {"_mzkitcpp_predict_formula", (DL_FUNC) &_mzkitcpp_predict_formula, 5},
+    {"_mzkitcpp_get_pressure_trace", (DL_FUNC) &_mzkitcpp_get_pressure_trace, 3},
     {"_mzkitcpp_import_msp_lipids_library", (DL_FUNC) &_mzkitcpp_import_msp_lipids_library, 7},
     {"_mzkitcpp_export_msp_lipids_library", (DL_FUNC) &_mzkitcpp_export_msp_lipids_library, 5},
     {"_mzkitcpp_mark_fragments_ms2_lib", (DL_FUNC) &_mzkitcpp_mark_fragments_ms2_lib, 4},

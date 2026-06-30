@@ -969,3 +969,43 @@ DataFrame predict_formula(
   return output;
 
 }
+
+// [[Rcpp::export]]
+DataFrame get_pressure_trace(
+    const String& sample_file,
+    const bool& verbose=true,
+    const bool& debug=false) {
+
+  auto start = std::chrono::system_clock::now();
+
+  //print time message if verbose flag is set.
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) {
+    Rcout << "mzkitcpp::get_scan_data() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  }
+
+  string filename = string(sample_file.get_cstring());
+
+  xml_document doc;
+
+  const unsigned int parse_options = parse_minimal;
+
+  bool loadok = doc.load_file(filename.c_str(), parse_options);
+  if (!loadok ) {
+    Rcerr << "Failed to load " << filename << endl;
+    return DataFrame::create();
+  }
+
+  // xml_node pressureTrace = doc.first_child().first_element_by_path("mzML/run/chromatogramList")
+
+  // TODO
+  DataFrame output = DataFrame::create(
+
+    Named("TODO") = StringVector(),
+
+    _["stringsAsFactors"] = false
+  );
+
+  return output;
+}
