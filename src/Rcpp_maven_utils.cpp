@@ -1054,3 +1054,83 @@ DataFrame get_pressure_trace(
 
   return output;
 }
+
+// [[Rcpp::export]]
+DataFrame predict_isotopic_envelope(
+    const String& formula,
+    const StringVector& atoms_to_ignore,
+    const double& prob_threshold = 1e-6,
+    const bool& verbose=true,
+    const bool& debug=false) {
+
+  auto start = std::chrono::system_clock::now();
+
+  map<string, int> atoms = MassCalculator::getComposition(formula);
+
+  //removes keys from map, even if they don't exist in the map already
+  for (const String& atomSymbol : atoms_to_ignore) {
+    string atomSymbolStr = string(atomSymbol.get_cstring());
+    atoms.erase(atomSymbolStr);
+  }
+
+  // compute full natural abundance distribution, considering all atoms provided
+  NaturalAbundanceDistribution dist = MassCalculator::getNaturalAbundanceDistribution(
+    atoms,
+    1,
+    NaturalAbundanceData::defaultNaturalAbundanceData,
+    0,
+    debug
+  );
+
+  //flatten distribution by summing atoms of common numbers
+  map<int, double> simplifiedDist = MassCalculator::getFlatNaturalAbundanceDistribution(
+    dist,
+    debug
+  );
+
+  // distribution might skip neutrons, unclear how many neutrons involved
+  int maxValue = 0;
+  for (auto it = simplifiedDist.begin(); it != simplifiedDist.end(); ++it) {
+    if (it->first > maxValue) {
+      maxValue = it->first;
+    }
+  }
+
+  // always walk up from 0 to maxValue, no matter what
+  vector<string> isotopeVec{};
+  vector<double> probabilityVec{};
+  for (unsigned int i = 0; i < maxValue; i++) {
+      double probability = 0;
+      if (simplifiedDist.find(i) != simplifiedDist.end()) {
+        probability = simplifiedDist[i];
+      }
+
+      if (probability >= prob_threshold) {
+        stringstream isotope;
+        isotope << "[M+" << i << "]";
+
+        isotopeVec.push_back(isotope.str());
+        probabilityVec.push_back(probability);
+      }
+  }
+
+  StringVector isotopeVector = wrap(isotopeVec);
+  NumericVector probabilityVector = wrap(probabilityVec);
+
+  DataFrame output = DataFrame::create(
+
+    Named("isotope") = isotopeVector,
+    Named("probability") = probabilityVector,
+
+    _["stringsAsFactors"] = false
+  );
+
+  //print time message if verbose flag is set.
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) {
+    Rcout << "mzkitcpp::get_pressure_trace() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+  }
+
+  return output;
+}

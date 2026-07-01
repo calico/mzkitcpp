@@ -33,6 +33,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **1.3.0** maldesi enhancements for scan-specific parameters
 - **1.4.0** add `combine_formulas()` utility method
 - **1.5.0** added `get_pressure_trace()` utility method
+- **1.6.0** added `predict_isotopic_envelope()` utility method
 
 # Functions
 - **DI_encoded_search_params**: Encodes DI search parameters into a formatted string.
