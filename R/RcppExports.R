@@ -189,7 +189,7 @@ get_pressure_trace <- function(sample_file, verbose = TRUE, debug = FALSE) {
     .Call(`_mzkitcpp_get_pressure_trace`, sample_file, verbose, debug)
 }
 
-predict_isotopic_envelope <- function(formula, atoms_to_ignore, prob_threshold = 1e-6, verbose = TRUE, debug = FALSE) {
+predict_isotopic_envelope <- function(formula, atoms_to_ignore = NULL, prob_threshold = 1e-6, verbose = TRUE, debug = FALSE) {
     .Call(`_mzkitcpp_predict_isotopic_envelope`, formula, atoms_to_ignore, prob_threshold, verbose, debug)
 }
 

@@ -706,13 +706,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // predict_isotopic_envelope
-DataFrame predict_isotopic_envelope(const String& formula, const StringVector& atoms_to_ignore, const double& prob_threshold, const bool& verbose, const bool& debug);
+DataFrame predict_isotopic_envelope(const String& formula, Nullable<StringVector> atoms_to_ignore, const double& prob_threshold, const bool& verbose, const bool& debug);
 RcppExport SEXP _mzkitcpp_predict_isotopic_envelope(SEXP formulaSEXP, SEXP atoms_to_ignoreSEXP, SEXP prob_thresholdSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const String& >::type formula(formulaSEXP);
-    Rcpp::traits::input_parameter< const StringVector& >::type atoms_to_ignore(atoms_to_ignoreSEXP);
+    Rcpp::traits::input_parameter< Nullable<StringVector> >::type atoms_to_ignore(atoms_to_ignoreSEXP);
     Rcpp::traits::input_parameter< const double& >::type prob_threshold(prob_thresholdSEXP);
     Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
