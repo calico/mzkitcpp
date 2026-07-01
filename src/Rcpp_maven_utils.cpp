@@ -1058,7 +1058,7 @@ DataFrame get_pressure_trace(
 // [[Rcpp::export]]
 DataFrame predict_isotopic_envelope(
     const String& formula,
-    const StringVector& atoms_to_ignore,
+    Nullable<StringVector> atoms_to_ignore = R_NilValue,
     const double& prob_threshold = 1e-6,
     const bool& verbose=true,
     const bool& debug=false) {
@@ -1068,9 +1068,12 @@ DataFrame predict_isotopic_envelope(
   map<string, int> atoms = MassCalculator::getComposition(formula);
 
   //removes keys from map, even if they don't exist in the map already
-  for (const String& atomSymbol : atoms_to_ignore) {
-    string atomSymbolStr = string(atomSymbol.get_cstring());
-    atoms.erase(atomSymbolStr);
+  if (!atoms_to_ignore.isNull()) {
+    StringVector atoms_to_ignore_unwrapped = atoms_to_ignore.get();
+    for (const String& atomSymbol : atoms_to_ignore_unwrapped) {
+      string atomSymbolStr = string(atomSymbol.get_cstring());
+      atoms.erase(atomSymbolStr);
+    }
   }
 
   // compute full natural abundance distribution, considering all atoms provided
@@ -1129,7 +1132,7 @@ DataFrame predict_isotopic_envelope(
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
   if (verbose) {
-    Rcout << "mzkitcpp::get_pressure_trace() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+    Rcout << "mzkitcpp::predict_isotopic_envelope() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
   }
 
   return output;
