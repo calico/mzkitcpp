@@ -94,6 +94,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **peptide_sequence_to_formula**: Converts a peptide amino acid sequence to its molecular formula.
 - **precursor_mass**: Calculates precursor m/z values from molecular formulas and adducts.
 - **predict_formula**: Predicts possible molecular formulas from a measured m/z value.
+- **predict_isotopic_envelope**: Computes isotopic envelope natural abundance distribution based on a molecular formula.
 - **qqq_peaks**: Extracts and quantifies peaks from triple quadrupole (QQQ) mass spectrometry data.
 - **hrms_peaks**: Extracts and quantifies peaks from high-resolution liquid chromatography (HRMS) mass spectrometry data.
 - **record_set_to_msp_library**: Converts formatted metabolite records to MSP spectral library format.
