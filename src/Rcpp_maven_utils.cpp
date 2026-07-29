@@ -496,6 +496,7 @@ DataFrame get_scan_metadata(
 
     //Scan data
     vector<int> match_scan_num{};
+    vector<double> match_rt{};
     vector<string> match_polarity{};
     vector<double> match_tic{};
     vector<double> match_scanWindowLowerLimit{};
@@ -518,6 +519,7 @@ DataFrame get_scan_metadata(
       //MAVEN scan num is actually the spectrumIndex value, which starts at 0.
       //Different scans may be different samples, so this must match exactly.
       match_scan_num.push_back((scan->scannum+1));
+      match_rt.push_back(scan->rt);
 
       string scanPolarity = "unknown";
       if (scan->getPolarity() == 1) {
@@ -542,6 +544,7 @@ DataFrame get_scan_metadata(
     //Rcpp outputs
     //Scan information
     IntegerVector output_scan_num = wrap(match_scan_num);
+    NumericVector output_rt = wrap(match_rt);
     StringVector output_polarity = wrap(match_polarity);
     NumericVector output_tic = wrap(match_tic);
     NumericVector output_scanWindowLowerLimit = wrap(match_scanWindowLowerLimit);
@@ -565,6 +568,7 @@ DataFrame get_scan_metadata(
 
       //Scan information
       Named("scan_num") = output_scan_num,
+      Named("rt") = output_rt,
       Named("polarity") = output_polarity,
       Named("tic") = output_tic,
       Named("scanWindowLowerLimit") = output_scanWindowLowerLimit,
