@@ -3231,7 +3231,7 @@ DataFrame getSingleSampleMs3Output(const vector<Ms3SingleSampleMatch*> singleSam
       }
 
       if (debug) {
-        Rcout << "row #" << (row+1) << " " << fragmentLabelOutput[row] << " " << to_string(ms3_mzsOutput[row])
+        Rcout << "row #" << (row+1) << " " << fragmentLabelOutput[row] << " " << ms3_mzsOutput[row]
               << " <==> "
               << " (intensity=" << ms3_intensitiesOutput[row] << ")" << endl;
       }
