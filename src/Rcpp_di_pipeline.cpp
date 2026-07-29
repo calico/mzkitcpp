@@ -868,6 +868,9 @@ shared_ptr<DirectInfusionSearchParameters> getDISearchParams(const List& di_sear
   if (di_search_params.containsElementNamed("scanFilterIsRetainFragmentsAbovePrecursorMz")) params->scanFilterIsRetainFragmentsAbovePrecursorMz = di_search_params["scanFilterIsRetainFragmentsAbovePrecursorMz"];
   if (di_search_params.containsElementNamed("scanFilterPrecursorPurityPpm")) params->scanFilterPrecursorPurityPpm = di_search_params["scanFilterPrecursorPurityPpm"];
   if (di_search_params.containsElementNamed("scanFilterMinIntensity")) params->scanFilterMinIntensity = di_search_params["scanFilterMinIntensity"];
+  if (di_search_params.containsElementNamed("scanSpecificIntensityNormFactors")) {
+    params->scanSpecificIntensityNormFactors = mzUtils::decodeMzRemovedStr(di_search_params["scanSpecificIntensityNormFactors"]);
+  }
 
   //scan filter for MS1 scans
   if (di_search_params.containsElementNamed("scanFilterMs1MinRt")) params->scanFilterMs1MinRt = di_search_params["scanFilterMs1MinRt"];
