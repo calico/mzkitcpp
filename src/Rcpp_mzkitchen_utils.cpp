@@ -802,12 +802,21 @@ List merge_split_groups_by_name(
   //start timer
   auto start = std::chrono::system_clock::now();
 
-  //group level data
-  IntegerVector groupId = groups_subset["groupId"];
-  StringVector compoundId = groups_subset["compoundId"];
+  //group level data from groups_subset
+  IntegerVector groupId_subset = groups_subset["groupId"];
+  StringVector compoundId_subset = groups_subset["compoundId"];
+
+  // Build map from groupId to compoundId
+  map<int, string> groupIdToCompoundId{};
+  for (unsigned int i = 0; i < groupId_subset.size(); i++) {
+    int currentGroupId = groupId_subset[i];
+    String compoundIdStr = compoundId_subset[i];
+    string currentCompoundId(compoundIdStr.get_cstring());
+    groupIdToCompoundId[currentGroupId] = currentCompoundId;
+  }
 
   //peaks level data
-  IntegerVector peakGroupId = peaks["groupId"];
+  IntegerVector groupId = peaks["groupId"];
   IntegerVector peakId = peaks["peakId"];
   IntegerVector sampleId = peaks["sampleId"];
   StringVector name = peaks["name"];
@@ -817,104 +826,193 @@ List merge_split_groups_by_name(
   NumericVector rtmax = peaks["rtmax"];
   NumericVector peakIntensity = peaks["peakIntensity"];
 
-  // Build map from compoundId to all groupIds that share that compoundId
-  map<string, vector<int>> groupNameToGroupIds{};
-  for (unsigned int i = 0; i < groupId.size(); i++) {
-
-    int currentGroupId = groupId[i];
-    String compoundIdStr = compoundId[i];
-    string currentCompoundId(compoundIdStr.get_cstring());
-
-    if (groupNameToGroupIds.find(currentCompoundId) == groupNameToGroupIds.end()) {
-      groupNameToGroupIds.insert(make_pair(currentCompoundId, vector<int>{}));
-    }
-    groupNameToGroupIds[currentCompoundId].push_back(currentGroupId);
-  }
-
-  // Build mapping from old groupId to new (chosen) groupId
-  // For each compoundId, pick the smallest groupId as the "chosen" one
-  map<int, int> groupIdMapping{};
-
-  // Output structures for tracking which groups were merged
-  vector<int> chosen_groupId{};
-  vector<int> merged_groupIds{};
-
-  for (auto it = groupNameToGroupIds.begin(); it != groupNameToGroupIds.end(); ++it) {
-    string currentCompoundId = it->first;
-    vector<int> groupIds = it->second;
-
-    if (groupIds.size() > 1) {
-      // Sort to get consistent chosen groupId (smallest one)
-      sort(groupIds.begin(), groupIds.end());
-
-      int chosenGroupId = groupIds[0];
-
-      if (verbose) {
-        Rcout << "Merging " << groupIds.size() << " groups with compoundId '"
-              << currentCompoundId << "' into groupId " << chosenGroupId << endl;
-      }
-
-      // Map all groupIds to the chosen one
-      for (unsigned int i = 0; i < groupIds.size(); i++) {
-        int currentGroupId = groupIds[i];
-        groupIdMapping[currentGroupId] = chosenGroupId;
-
-        // Record the merge relationship
-        chosen_groupId.push_back(chosenGroupId);
-        merged_groupIds.push_back(currentGroupId);
-
-        if (debug) {
-          Rcout << "  Mapping groupId " << currentGroupId << " -> " << chosenGroupId << endl;
-        }
-      }
-    } else {
-      // Only one group with this compoundId, map to itself
-      int singleGroupId = groupIds[0];
-      groupIdMapping[singleGroupId] = singleGroupId;
-
-      // Still record it as a "merge" of itself
-      chosen_groupId.push_back(singleGroupId);
-      merged_groupIds.push_back(singleGroupId);
-    }
-  }
-
-  // Apply the mapping to all peaks
+  //output
   vector<int> updated_groupId{};
   vector<int> updated_peakId{};
 
+  vector<int> chosen_groupId{};
+  vector<int> merged_groupIds{};
+
+  //iterating variables
+  int previous_groupId = -1;
+  string previous_compoundId = "";
+
+  //dummy sample data, only containing sampleId
+  map<int, mzSample*> mzSampleMap{};
+
+  //used for sample input information
+  map<int, PeakContainer> peakGroupData{};
+  PeakContainer current_peakContainer = PeakContainer();
+
+  map<int, int> counterToGroupId{};
+
+  int counter = 0;
+
   for (unsigned int i = 0; i < peaks.nrows(); i++) {
-    int currentPeakGroupId = peakGroupId[i];
-    int currentPeakId = peakId[i];
 
-    // Look up the new groupId (if it exists in the mapping)
-    if (groupIdMapping.find(currentPeakGroupId) != groupIdMapping.end()) {
-      int newGroupId = groupIdMapping[currentPeakGroupId];
-      updated_groupId.push_back(newGroupId);
-      updated_peakId.push_back(currentPeakId);
+    //Retrieve group-level information.
+    int current_groupId = groupId[i];
+    string current_compoundId = groupIdToCompoundId[current_groupId];
 
-      if (debug && currentPeakGroupId != newGroupId) {
-        Rcout << "  Reassigning peakId " << currentPeakId
-              << " from groupId " << currentPeakGroupId
-              << " to groupId " << newGroupId << endl;
-      }
-    } else {
-      // This shouldn't happen if groups_subset and peaks are consistent,
-      // but handle it gracefully by keeping the original groupId
-      if (verbose) {
-        Rcout << "Warning: peakId " << currentPeakId
-              << " has groupId " << currentPeakGroupId
-              << " which is not in groups_subset" << endl;
-      }
-      updated_groupId.push_back(currentPeakGroupId);
-      updated_peakId.push_back(currentPeakId);
+    //Retrieve sample information, create if necessary.
+    int sampleIdVal = sampleId[i];
+    String nameVal_Rstr = name[i];
+    string nameVal(nameVal_Rstr.get_cstring());
+
+    if (mzSampleMap.find(sampleIdVal) == mzSampleMap.end()) {
+      mzSample *sample = new mzSample();
+      sample->sampleId = sampleIdVal;
+      sample->sampleName = nameVal;
+      mzSampleMap.insert(make_pair(sampleIdVal, sample));
     }
+    mzSample *sample = mzSampleMap[sampleIdVal];
+
+    //Create Peak object.
+    Peak p;
+    p.sample = sample;
+    p.peakMz = peakMz[i];
+    p.rtmin = rtmin[i];
+    p.rt = rt[i];
+    p.rtmax = rtmax[i];
+    p.peakIntensity = peakIntensity[i];
+    p.pos = peakId[i]; // overloading this field, as it isn't used during grouping/merging.
+
+    //last row completes a group, as do transitions between group IDs.
+    bool isCompletedGroup = i == peaks.nrows()-1 || (i > 0 && current_groupId != previous_groupId);
+
+    if (isCompletedGroup) {
+      //Add Peak to current_peakContainer (first peak, or still a part of the original group).
+
+      //save previous peak container, and reset.
+      current_peakContainer.mergedEICPeakIndexes.insert(previous_groupId);
+      current_peakContainer.recomputeProperties();
+
+      if (debug) {
+        Rcout << "i=" << i <<": current_peakContainer #peaks=" << current_peakContainer.peaks.size() << ", RT="
+              << "[" << current_peakContainer.minPeakRt << " min - " << current_peakContainer.maxPeakRt << " min]."
+              << endl;
+      }
+
+      peakGroupData.insert(make_pair(counter, current_peakContainer));
+      counterToGroupId.insert(make_pair(counter, previous_groupId));
+
+      //reset for next iteration.
+      current_peakContainer = PeakContainer();
+      counter++;
+
+      // Check if compoundId changed (this is the key difference from merge_split_groups)
+      bool isFormNewSlice = (current_compoundId != previous_compoundId);
+
+      if (debug) {
+        Rcout << "compoundId: current='" << current_compoundId
+              << "', previous='" << previous_compoundId
+              << "', in separate slices? " << (isFormNewSlice ? "YES" : "NO")
+              << endl;
+      }
+
+      //If a new slice is formed, process the previous slice before resetting the new slice.
+      if (isFormNewSlice) {
+
+        //Based on the current proposed mapping of peaks to peak groups and
+        //parameters, propose alternate mapping of peaks to peak groups.
+        map<int, PeakContainer> updatedPeakGroupData = EIC::mergePeakContainers(
+          peakGroupData,
+          -1.0, // groupMergeOverlap - force merge for same compoundId
+          false);
+
+        //Note any reassignments, save in output structures
+        for (auto it = updatedPeakGroupData.begin(); it != updatedPeakGroupData.end(); ++it){
+          int counterKey = it->first;
+          PeakContainer container = it->second;
+          int groupIndex = counterToGroupId.at(counterKey);
+
+          if (debug) {
+            cout << "groupIndex=" << groupIndex << ", # Peaks=" << container.peaks.size() << endl;
+          }
+
+          if (container.peaks.empty()) {
+            updated_groupId.push_back(groupIndex);
+            updated_peakId.push_back(-1);
+          } else {
+            for (auto it2 = container.peaks.begin(); it2 != container.peaks.end(); ++it2) {
+              Peak p = it2->second;
+
+              updated_groupId.push_back(groupIndex);
+              updated_peakId.push_back(p.pos);
+            }
+
+            set<int> mergedGroupIds = container.mergedEICPeakIndexes;
+
+            for (auto it2 = mergedGroupIds.begin(); it2 != mergedGroupIds.end(); ++it2) {
+              chosen_groupId.push_back(groupIndex);
+              merged_groupIds.push_back(*it2);
+            }
+          }
+        }
+
+        //clear maps in preparation for next iteration.
+        peakGroupData.clear();
+        counterToGroupId.clear();
+        counter = 0;
+      }
+
+    }
+
+    //save peak in current container.
+    //Note that this may have been recently updated.
+    current_peakContainer.peaks.insert(make_pair(sample, p));
+
+    //reset counters
+    previous_groupId = current_groupId;
+    previous_compoundId = current_compoundId;
+  }
+
+  //process the last slice. Note that this may be the first time any slice is assessed.
+  map<int, PeakContainer> updatedPeakGroupData = EIC::mergePeakContainers(
+    peakGroupData,
+    -1.0, // groupMergeOverlap - force merge for same compoundId
+    false);
+
+  //Note any reassignments, save in output structures
+  for (auto it = updatedPeakGroupData.begin(); it != updatedPeakGroupData.end(); ++it){
+    int counterKey = it->first;
+    PeakContainer container = it->second;
+    int groupIndex = counterToGroupId.at(counterKey);
+
+    if (debug) {
+      Rcout << "groupIndex=" << groupIndex << ", # Peaks=" << container.peaks.size() << endl;
+    }
+
+    if (container.peaks.empty()) {
+      updated_groupId.push_back(groupIndex);
+      updated_peakId.push_back(-1);
+    } else {
+      for (auto it2 = container.peaks.begin(); it2 != container.peaks.end(); ++it2) {
+        Peak p = it2->second;
+
+        updated_groupId.push_back(groupIndex);
+        updated_peakId.push_back(p.pos);
+      }
+
+      set<int> mergedGroupIds = container.mergedEICPeakIndexes;
+
+      for (auto it2 = mergedGroupIds.begin(); it2 != mergedGroupIds.end(); ++it2) {
+          chosen_groupId.push_back(groupIndex);
+          merged_groupIds.push_back(*it2);
+      }
+    }
+
+  }
+
+  //cleanup - prevent memory leaks
+  for (auto it = mzSampleMap.begin(); it != mzSampleMap.end(); ++it) {
+    delete(it->second);
   }
 
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
   if (verbose) {
-    Rcout << "mzkitcpp::merge_split_groups_by_name() Execution Time: "
-          << to_string(elapsed_seconds.count()) << " s" << endl;
+    Rcout << "mzkitcpp::merge_split_groups_by_name() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
   }
 
   DataFrame updated_peakgroups = DataFrame::create(

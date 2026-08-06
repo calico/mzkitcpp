@@ -245,6 +245,10 @@ merge_split_groups <- function(peaks, mz_tol = 5.0, rt_tol = 0.1, groupMergeOver
     .Call(`_mzkitcpp_merge_split_groups`, peaks, mz_tol, rt_tol, groupMergeOverlap, verbose, debug)
 }
 
+merge_split_groups_by_name <- function(groups_subset, peaks, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_merge_split_groups_by_name`, groups_subset, peaks, verbose, debug)
+}
+
 qqq_peaks <- function(mzml_file, query_transitions, params, debug = FALSE, verbose = FALSE) {
     .Call(`_mzkitcpp_qqq_peaks`, mzml_file, query_transitions, params, debug, verbose)
 }

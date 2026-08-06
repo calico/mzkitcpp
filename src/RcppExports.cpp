@@ -908,6 +908,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// merge_split_groups_by_name
+List merge_split_groups_by_name(const DataFrame& groups_subset, const DataFrame& peaks, bool verbose, bool debug);
+RcppExport SEXP _mzkitcpp_merge_split_groups_by_name(SEXP groups_subsetSEXP, SEXP peaksSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type groups_subset(groups_subsetSEXP);
+    Rcpp::traits::input_parameter< const DataFrame& >::type peaks(peaksSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< bool >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_split_groups_by_name(groups_subset, peaks, verbose, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
 // qqq_peaks
 DataFrame qqq_peaks(String& mzml_file, DataFrame& query_transitions, List& params, bool debug, bool verbose);
 RcppExport SEXP _mzkitcpp_qqq_peaks(SEXP mzml_fileSEXP, SEXP query_transitionsSEXP, SEXP paramsSEXP, SEXP debugSEXP, SEXP verboseSEXP) {
@@ -1082,6 +1096,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_mzk_get_isotope_parameters", (DL_FUNC) &_mzkitcpp_mzk_get_isotope_parameters, 2},
     {"_mzkitcpp_find_duplicate_peaks", (DL_FUNC) &_mzkitcpp_find_duplicate_peaks, 6},
     {"_mzkitcpp_merge_split_groups", (DL_FUNC) &_mzkitcpp_merge_split_groups, 6},
+    {"_mzkitcpp_merge_split_groups_by_name", (DL_FUNC) &_mzkitcpp_merge_split_groups_by_name, 4},
     {"_mzkitcpp_qqq_peaks", (DL_FUNC) &_mzkitcpp_qqq_peaks, 5},
     {"_mzkitcpp_hrms_peaks", (DL_FUNC) &_mzkitcpp_hrms_peaks, 5},
     {"_mzkitcpp_update_rts", (DL_FUNC) &_mzkitcpp_update_rts, 4},
