@@ -773,3 +773,164 @@ List merge_split_groups(const DataFrame& peaks,
     Named("updated_peaks") = updated_peaks);
 
 }
+
+/**
+ * @brief
+ *    Given a filtered dataframe sorted by (groupId, sampleId), identify
+ *    peakgroups that were split, and should be merged together based on common compoundName.
+ *
+ *    In cases where peak groups should be merged together, one peak group will
+ *    consume all of the peaks.
+ *
+ *    A record is kept of all of the original groups that were merged together.
+ *    This can be passed back and handled separately.
+ *
+ *    Return a dataframe of peak reassignments, mapping peakId to new groupIds.
+ *    If a peakId is missing from this output, it is not reassigned.
+ *    if a peakId is assigned to a groupId of -1, it should be dropped entirely.
+ *
+ *    Assume that this dataframe is sorted by groupId, then sampleId.
+ *
+ */
+// [[Rcpp::export]]
+List merge_split_groups_by_name(
+    const DataFrame& groups_subset,
+    const DataFrame& peaks,
+    bool verbose=true,
+    bool debug=false) {
+
+  //start timer
+  auto start = std::chrono::system_clock::now();
+
+  //group level data
+  IntegerVector groupId = groups_subset["groupId"];
+  StringVector compoundId = groups_subset["compoundId"];
+
+  //peaks level data
+  IntegerVector peakGroupId = peaks["groupId"];
+  IntegerVector peakId = peaks["peakId"];
+  IntegerVector sampleId = peaks["sampleId"];
+  StringVector name = peaks["name"];
+  NumericVector peakMz = peaks["peakMz"];
+  NumericVector rtmin = peaks["rtmin"];
+  NumericVector rt = peaks["rt"];
+  NumericVector rtmax = peaks["rtmax"];
+  NumericVector peakIntensity = peaks["peakIntensity"];
+
+  // Build map from compoundId to all groupIds that share that compoundId
+  map<string, vector<int>> groupNameToGroupIds{};
+  for (unsigned int i = 0; i < groupId.size(); i++) {
+
+    int currentGroupId = groupId[i];
+    String compoundIdStr = compoundId[i];
+    string currentCompoundId(compoundIdStr.get_cstring());
+
+    if (groupNameToGroupIds.find(currentCompoundId) == groupNameToGroupIds.end()) {
+      groupNameToGroupIds.insert(make_pair(currentCompoundId, vector<int>{}));
+    }
+    groupNameToGroupIds[currentCompoundId].push_back(currentGroupId);
+  }
+
+  // Build mapping from old groupId to new (chosen) groupId
+  // For each compoundId, pick the smallest groupId as the "chosen" one
+  map<int, int> groupIdMapping{};
+
+  // Output structures for tracking which groups were merged
+  vector<int> chosen_groupId{};
+  vector<int> merged_groupIds{};
+
+  for (auto it = groupNameToGroupIds.begin(); it != groupNameToGroupIds.end(); ++it) {
+    string currentCompoundId = it->first;
+    vector<int> groupIds = it->second;
+
+    if (groupIds.size() > 1) {
+      // Sort to get consistent chosen groupId (smallest one)
+      sort(groupIds.begin(), groupIds.end());
+
+      int chosenGroupId = groupIds[0];
+
+      if (verbose) {
+        Rcout << "Merging " << groupIds.size() << " groups with compoundId '"
+              << currentCompoundId << "' into groupId " << chosenGroupId << endl;
+      }
+
+      // Map all groupIds to the chosen one
+      for (unsigned int i = 0; i < groupIds.size(); i++) {
+        int currentGroupId = groupIds[i];
+        groupIdMapping[currentGroupId] = chosenGroupId;
+
+        // Record the merge relationship
+        chosen_groupId.push_back(chosenGroupId);
+        merged_groupIds.push_back(currentGroupId);
+
+        if (debug) {
+          Rcout << "  Mapping groupId " << currentGroupId << " -> " << chosenGroupId << endl;
+        }
+      }
+    } else {
+      // Only one group with this compoundId, map to itself
+      int singleGroupId = groupIds[0];
+      groupIdMapping[singleGroupId] = singleGroupId;
+
+      // Still record it as a "merge" of itself
+      chosen_groupId.push_back(singleGroupId);
+      merged_groupIds.push_back(singleGroupId);
+    }
+  }
+
+  // Apply the mapping to all peaks
+  vector<int> updated_groupId{};
+  vector<int> updated_peakId{};
+
+  for (unsigned int i = 0; i < peaks.nrows(); i++) {
+    int currentPeakGroupId = peakGroupId[i];
+    int currentPeakId = peakId[i];
+
+    // Look up the new groupId (if it exists in the mapping)
+    if (groupIdMapping.find(currentPeakGroupId) != groupIdMapping.end()) {
+      int newGroupId = groupIdMapping[currentPeakGroupId];
+      updated_groupId.push_back(newGroupId);
+      updated_peakId.push_back(currentPeakId);
+
+      if (debug && currentPeakGroupId != newGroupId) {
+        Rcout << "  Reassigning peakId " << currentPeakId
+              << " from groupId " << currentPeakGroupId
+              << " to groupId " << newGroupId << endl;
+      }
+    } else {
+      // This shouldn't happen if groups_subset and peaks are consistent,
+      // but handle it gracefully by keeping the original groupId
+      if (verbose) {
+        Rcout << "Warning: peakId " << currentPeakId
+              << " has groupId " << currentPeakGroupId
+              << " which is not in groups_subset" << endl;
+      }
+      updated_groupId.push_back(currentPeakGroupId);
+      updated_peakId.push_back(currentPeakId);
+    }
+  }
+
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  if (verbose) {
+    Rcout << "mzkitcpp::merge_split_groups_by_name() Execution Time: "
+          << to_string(elapsed_seconds.count()) << " s" << endl;
+  }
+
+  DataFrame updated_peakgroups = DataFrame::create(
+    Named("groupId") = chosen_groupId,
+    Named("subsumed_groupId") = merged_groupIds,
+    _["stringsAsFactors"] = false
+  );
+
+  DataFrame updated_peaks = DataFrame::create(
+    Named("groupId") = updated_groupId,
+    Named("peakId") = updated_peakId,
+    _["stringsAsFactors"] = false
+  );
+
+  return List::create(
+    Named("updated_peakgroups") = updated_peakgroups,
+    Named("updated_peaks") = updated_peaks);
+
+}

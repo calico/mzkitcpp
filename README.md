@@ -87,7 +87,8 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **maldesi_search**: Searches for compounds in MALDESI imaging data using exact mass or adduct-based matching.
 - **mark_fragments_ms2_lib**: Marks specific fragments in an MS2 spectral library (e.g., as diagnostic ions).
 - **match_id_candidates_rcpp**: (Deprecated) Matches compound identification candidates based on m/z.
-- **merge_split_groups**: Identifies and merges peakgroups that were incorrectly split during peak detection.
+- **merge_split_groups**: Identifies and merges peakgroups that were incorrectly split during peak detection, using mz and RT proximity.
+- **merge_split_groups_by_name**: Identifies and merges peakgroups that were incorrectly split during peak detection, using common compoundId strings.
 - **monoiosotopic_mass**: Calculates monoisotopic masses and adducted m/z values for molecular formulas.
 - **mzk_get_isotope_parameters**: Encodes isotope search parameters into a formatted string.
 - **mzk_get_lipid_parameters**: Encodes lipid search parameters into a formatted string.
