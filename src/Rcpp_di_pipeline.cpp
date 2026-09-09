@@ -893,6 +893,10 @@ shared_ptr<DirectInfusionSearchParameters> getDISearchParams(const List& di_sear
       params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
     } else if (consensusIntensityAgglomerationTypeRString == "MEDIAN") {
       params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+    } else if (consensusIntensityAgglomerationTypeRString == "SUM") {
+      params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Sum;
+    } else if (consensusIntensityAgglomerationTypeRString == "MAX") {
+      params->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Max;
     }
   }
 
