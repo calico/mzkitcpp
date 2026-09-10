@@ -3176,6 +3176,7 @@ DataFrame getSingleSampleMs3Output(const vector<Ms3SingleSampleMatch*> singleSam
 
   NumericVector ms1_intensitiesOutput = NumericVector(numOutputRows);
   NumericVector ms3_intensitiesOutput = NumericVector(numOutputRows);
+  StringVector ms3_scansOutput = StringVector(numOutputRows);
   NumericVector ms3_intensity_sum_output = NumericVector(numOutputRows);
   NumericVector ms3_intensity_sum_norm_output = NumericVector(numOutputRows, NA_REAL);
 
@@ -3185,8 +3186,12 @@ DataFrame getSingleSampleMs3Output(const vector<Ms3SingleSampleMatch*> singleSam
 
     for (auto it = match->intensityByMs1Ms2Ms3Mzs.begin(); it != match->intensityByMs1Ms2Ms3Mzs.end(); ++it) {
 
-      int ms2Mz = it->first.first;
-      int pos = it->first.second;
+      //Note this mzKey is actually set up as <ms2Mz, Ms1 mz position in map>.
+      pair<int, int> mzKey = it->first;
+      int ms2Mz = mzKey.first;
+      int pos = mzKey.second;
+
+      string matchingScansSummary = match->scansByMs1Ms2Ms3Mzs.at(mzKey);
 
       double ms2MzDouble = mzUtils::intKeyToMz(ms2Mz);
 
@@ -3218,7 +3223,15 @@ DataFrame getSingleSampleMs3Output(const vector<Ms3SingleSampleMatch*> singleSam
       molecularFormulaOutput[row] = match->ms3Compound->baseCompound->formula;
       compoundMonoisotopicMassOutput[row] = match->ms3Compound->baseCompound->getExactMass();
       adductNameOutput[row] = match->ms3Compound->baseCompound->adductString;
-      numMatchesOutput[row] = match->ms3MatchesByMs2Mz[ms2Mz];
+
+      //possible bug?
+      //START OLD
+      //numMatchesOutput[row] = match->ms3MatchesByMs2Mz[ms2Mz]; //should have never been used?
+      //END OLD
+      //START NEW
+      numMatchesOutput[row] = match->numMs3Matches; //all MS3 matches across all <Ms1, Ms2> for compound
+      //END NEW
+
       numMs3MzMatchesOutput[row] = match->numMs3MzMatches;
 
       fragmentLabelOutput[row] = match->ms3Compound->ms3_fragment_labels[ms2Mz][pos];
@@ -3228,6 +3241,7 @@ DataFrame getSingleSampleMs3Output(const vector<Ms3SingleSampleMatch*> singleSam
 
       ms1_intensitiesOutput[row] = match->observedMs1Intensity > 0 ? match->observedMs1Intensity : NA_REAL;
       ms3_intensitiesOutput[row] = it->second;
+      ms3_scansOutput[row] = matchingScansSummary;
       ms3_intensity_sum_output[row] = match->sumMs3MzIntensity;
 
       if (isSingleSampleMatch && isSingleSampleMatch->sumMs3MzIntensity > 0) {
@@ -3267,6 +3281,7 @@ DataFrame getSingleSampleMs3Output(const vector<Ms3SingleSampleMatch*> singleSam
 
     Named("ms1_intensity") = ms1_intensitiesOutput,
     Named("ms3_intensity") =  ms3_intensitiesOutput,
+    Named("ms3_scans") = ms3_scansOutput,
     Named("ms3_intensity_sum") = ms3_intensity_sum_output,
     Named("ms3_intensity_sum_norm") = ms3_intensity_sum_norm_output,
 
