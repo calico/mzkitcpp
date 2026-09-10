@@ -3320,6 +3320,7 @@ DataFrame getMultipleSampleMs3Output(const map<String, DataFrame>& allSampleResu
 
   NumericVector ms1_intensitiesOutput = NumericVector(numOutputRows);
   NumericVector ms3_intensitiesOutput = NumericVector(numOutputRows);
+  StringVector  ms3_scansOutput = StringVector(numOutputRows);
   NumericVector ms3_intensity_sumOutput = NumericVector(numOutputRows);
   NumericVector ms3_intensity_sum_norm_output = NumericVector(numOutputRows);
 
@@ -3348,6 +3349,7 @@ DataFrame getMultipleSampleMs3Output(const map<String, DataFrame>& allSampleResu
 
     NumericVector ms1_intensitiesOutputI = sampleResults["ms1_intensity"];
     NumericVector ms3_intensitiesOutputI = sampleResults["ms3_intensity"];
+    StringVector  ms3_scansOutputI = sampleResults["ms3_scans"];
     NumericVector ms3_intensity_sumOutputI = sampleResults["ms3_intensity_sum"];
     NumericVector ms3_intensity_sum_norm_outputI = sampleResults["ms3_intensity_sum_norm"];
 
@@ -3372,6 +3374,7 @@ DataFrame getMultipleSampleMs3Output(const map<String, DataFrame>& allSampleResu
 
       ms1_intensitiesOutput[row] = ms1_intensitiesOutputI[i];
       ms3_intensitiesOutput[row] = ms3_intensitiesOutputI[i];
+      ms3_scansOutput[row] = ms3_scansOutputI[i];
       ms3_intensity_sumOutput[row] = ms3_intensity_sumOutputI[i];
       ms3_intensity_sum_norm_output[row] = ms3_intensity_sum_norm_outputI[i];
 
@@ -3405,6 +3408,7 @@ DataFrame getMultipleSampleMs3Output(const map<String, DataFrame>& allSampleResu
 
     Named("ms1_intensity") = ms1_intensitiesOutput,
     Named("ms3_intensity") = ms3_intensitiesOutput,
+    Named("ms3_scans") = ms3_scansOutput,
     Named("ms3_intensity_sum") = ms3_intensity_sumOutput,
     Named("ms3_intensity_sum_norm") = ms3_intensity_sum_norm_output,
 
