@@ -89,6 +89,16 @@ String mzk_get_isotope_parameters(const List& params, bool debug=false) {
     if (params.containsElementNamed("eic_smoothingWindow")) {
       isotopeParameters->eic_smoothingWindow = params["eic_smoothingWindow"];
     }
+    if (params.containsElementNamed("eic_smoothingAlgorithm")) {
+      int eic_smoothingAlgorithmInt = params["eic_smoothingAlgorithm"];
+      isotopeParameters->eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(eic_smoothingAlgorithmInt);
+    }
+    if (params.containsElementNamed("isCondenseTheoreticalIsotopes")) {
+      isotopeParameters->isCondenseTheoreticalIsotopes = params["isCondenseTheoreticalIsotopes"];
+    }
+    if (params.containsElementNamed("resolvingPower")) {
+      isotopeParameters->resolvingPower = params["resolvingPower"];
+    }
 
     if (params.containsElementNamed("atomSpecificMaxIsotopes")) {
       List atomSpecificMaxIsotopes = params["atomSpecificMaxIsotopes"];
@@ -144,8 +154,44 @@ String mzk_get_isotope_parameters(const List& params, bool debug=false) {
     }
 
     // diff iso specific
+    if (params.containsElementNamed("diffIsoQuantType")) {
+      string diffIsoQuantTypeStr = params["diffIsoQuantType"];
+      isotopeParameters->diffIsoQuantType = diffIsoQuantTypeStr;
+    }
+    if (params.containsElementNamed("diffIsoAgglomerationType")) {
+      string diffIsoAgglomerationTypeStr = params["diffIsoAgglomerationType"];
+      if (diffIsoAgglomerationTypeStr == "MEAN") {
+        isotopeParameters->diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+      } else if (diffIsoAgglomerationTypeStr == "MEDIAN") {
+        isotopeParameters->diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+      } else if (diffIsoAgglomerationTypeStr == "MAX") {
+        isotopeParameters->diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Max;
+      } else if (diffIsoAgglomerationTypeStr == "SUM") {
+        isotopeParameters->diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Sum;
+      }
+    }
     if (params.containsElementNamed("diffIsoIncludeSingleZero")) {
       isotopeParameters->diffIsoIncludeSingleZero = params["diffIsoIncludeSingleZero"];
+    }
+    if (params.containsElementNamed("diffIsoIncludeDoubleZero")) {
+      isotopeParameters->diffIsoIncludeDoubleZero = params["diffIsoIncludeDoubleZero"];
+    }
+    if (params.containsElementNamed("diffIsoReproducibilityThreshold")) {
+      isotopeParameters->diffIsoReproducibilityThreshold = params["diffIsoReproducibilityThreshold"];
+    }
+    if (params.containsElementNamed("diffIsoScoringCorrectNatAbundance")) {
+      isotopeParameters->diffIsoScoringCorrectNatAbundance = params["diffIsoScoringCorrectNatAbundance"];
+    }
+    if (params.containsElementNamed("diffIsoScoringFractionOfSampleTotal")) {
+      isotopeParameters->diffIsoScoringFractionOfSampleTotal = params["diffIsoScoringFractionOfSampleTotal"];
+    }
+    if (params.containsElementNamed("diffIsoScoringType")) {
+      string diffIsoScoringTypeStr = params["diffIsoScoringType"];
+      if (diffIsoScoringTypeStr == "PEARSON_CORRELATION") {
+        isotopeParameters->diffIsoScoringType = DiffIsoScoringType::PEARSON_CORRELATION;
+      } else if (diffIsoScoringTypeStr == "F_STATISTIC") {
+        isotopeParameters->diffIsoScoringType = DiffIsoScoringType::F_STATISTIC;
+      }
     }
 
     isotopeParameters->isotopeParametersType = IsotopeParametersType::SAVED;
