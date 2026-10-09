@@ -87,6 +87,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **maldesi_decode_params**: Decodes MALDESI parameter encodings into structured data frames, supporting both general and compound-specific parameter sets.
 - **maldesi_isotopic_envelope_finder**: Identifies isotopic envelopes in MALDESI imaging mass spectrometry data.
 - **maldesi_search**: Searches for compounds in MALDESI imaging data using exact mass or adduct-based matching.
+- **maldesi_search_df**: Searches for compounds in MALDESI data using a pre-computed scan data frame (scan_num/scan_data) instead of an mzML file.
 - **mark_fragments_ms2_lib**: Marks specific fragments in an MS2 spectral library (e.g., as diagnostic ions).
 - **match_id_candidates_rcpp**: (Deprecated) Matches compound identification candidates based on m/z.
 - **merge_split_groups**: Identifies and merges peakgroups that were incorrectly split during peak detection, using mz and RT proximity.
