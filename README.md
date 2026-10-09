@@ -36,6 +36,7 @@ install.packages(pkg_dir, type="source", repos=NULL)
 - **1.6.0** added `predict_isotopic_envelope()` utility method
 - **1.7.0** enhanced functionality for TG MS3 analysis
 - **1.8.0** enhanced functionality for isotopes analysis
+- **1.9.0** maldesi search to support non-mzML searches (directly from data frame)
 
 # Functions
 - **DI_encoded_search_params**: Encodes DI search parameters into a formatted string.

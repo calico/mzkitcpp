@@ -409,6 +409,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// maldesi_search_df
+DataFrame maldesi_search_df(const DataFrame& scans_data, const DataFrame& library, const List& search_params, const bool& verbose, const bool& debug);
+RcppExport SEXP _mzkitcpp_maldesi_search_df(SEXP scans_dataSEXP, SEXP librarySEXP, SEXP search_paramsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const DataFrame& >::type scans_data(scans_dataSEXP);
+    Rcpp::traits::input_parameter< const DataFrame& >::type library(librarySEXP);
+    Rcpp::traits::input_parameter< const List& >::type search_params(search_paramsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type debug(debugSEXP);
+    rcpp_result_gen = Rcpp::wrap(maldesi_search_df(scans_data, library, search_params, verbose, debug));
+    return rcpp_result_gen;
+END_RCPP
+}
 // maldesi_isotopic_envelope_finder
 DataFrame maldesi_isotopic_envelope_finder(const String& sample_file, const List& params, const bool& verbose, const bool& debug);
 RcppExport SEXP _mzkitcpp_maldesi_isotopic_envelope_finder(SEXP sample_fileSEXP, SEXP paramsSEXP, SEXP verboseSEXP, SEXP debugSEXP) {
@@ -1060,6 +1075,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mzkitcpp_get_last_rts", (DL_FUNC) &_mzkitcpp_get_last_rts, 3},
     {"_mzkitcpp_ISO_isotope_matrices", (DL_FUNC) &_mzkitcpp_ISO_isotope_matrices, 8},
     {"_mzkitcpp_maldesi_search", (DL_FUNC) &_mzkitcpp_maldesi_search, 5},
+    {"_mzkitcpp_maldesi_search_df", (DL_FUNC) &_mzkitcpp_maldesi_search_df, 5},
     {"_mzkitcpp_maldesi_isotopic_envelope_finder", (DL_FUNC) &_mzkitcpp_maldesi_isotopic_envelope_finder, 4},
     {"_mzkitcpp_maldesi_create_modified_mzML", (DL_FUNC) &_mzkitcpp_maldesi_create_modified_mzML, 5},
     {"_mzkitcpp_maldesi_decode_params", (DL_FUNC) &_mzkitcpp_maldesi_decode_params, 4},

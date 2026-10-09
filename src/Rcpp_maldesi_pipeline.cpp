@@ -33,13 +33,13 @@ using namespace std;
 
 #include "Rcpp_mzkitchen_utils.h"
 
-// [[Rcpp::export]]
-DataFrame maldesi_search(
-    const String& sample_file,
-    const DataFrame& library,
-    const List& search_params,
-    const bool& verbose=true,
-    const bool& debug=false) {
+DataFrame maldesi_search_internal(
+  const vector<Scan*>& scans,
+  const DataFrame& library,
+  const List& search_params,
+  const String& sample_name = "",
+  const bool& verbose=true,
+  const bool& debug=false){
 
   //start timer
   auto start = std::chrono::system_clock::now();
@@ -77,11 +77,6 @@ DataFrame maldesi_search(
 
   //Issue 1916: adjustments
   vector<bool> match_isMaxAbundanceIsotope{};
-
-  mzSample *sample = new mzSample();
-  string filename = sample_file.get_cstring();
-  sample->loadSample(filename.c_str());
-  String sample_basename = Rcpp::Language("basename", sample_file).eval();
 
   StringVector input_compound_name(library.nrows());
   StringVector input_molecular_formula(library.nrows());
@@ -224,10 +219,14 @@ DataFrame maldesi_search(
       backgroundMatchToZeroIntensity = backgroundSubtractionParams["backgroundMatchToZeroIntensity"];
     }
 
-    if (sample) {
+    if (!scans.empty()) {
       for (unsigned int i = 0; i < scanNums.length(); i++) {
         int mavenScanNum = (scanNums[i]-1);
-        Scan *scan = sample->getScan(mavenScanNum);
+
+        Scan *scan = nullptr;
+        if (mavenScanNum >= 0 && mavenScanNum < (int)scans.size()) {
+          scan = scans[mavenScanNum];
+        }
 
         if (scan) {
           backgroundSubtractionScans.push_back(scan);
@@ -301,9 +300,9 @@ DataFrame maldesi_search(
     librarySetParams = MaldesiParameters::decodeLibraryParamsSet(compoundNameStrVector, encodedScansVector);
   }
 
-  for (unsigned int i = 0; i < sample->scans.size(); i++) {
+  for (unsigned int i = 0; i < scans.size(); i++) {
 
-    Scan *scan = sample->scans[i];
+    Scan *scan = scans[i];
 
     //MAVEN scan num is actually the spectrumIndex value, which starts at 0.
     int scanNum = scan->scannum+1;
@@ -576,12 +575,12 @@ DataFrame maldesi_search(
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
   if (verbose) {
-    Rcout << "mzkitcpp::maldesi_search() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
+    Rcout << "mzkitcpp::maldesi_search_internal() Execution Time: " << to_string(elapsed_seconds.count()) << " s" << endl;
   }
 
   DataFrame output = DataFrame::create(
     //Scan information (11)
-    Named("sample") = StringVector(N, sample_basename),
+    Named("sample") = StringVector(N, sample_name),
     Named("scan_num") = output_scan_num,
     Named("polarity") = output_polarity,
     Named("tic") = output_tic,
@@ -622,8 +621,85 @@ DataFrame maldesi_search(
   }
 
   //clean up
+  //Note: `scans` is owned by the caller (either an mzSample* or the DataFrame-based wrapper), not here.
   if (backgroundFragment) delete(backgroundFragment);
-  if (sample) delete(sample);
+
+  return output;
+}
+
+// [[Rcpp::export]]
+DataFrame maldesi_search(
+    const String& sample_file,
+    const DataFrame& library,
+    const List& search_params,
+    const bool& verbose=true,
+    const bool& debug=false) {
+
+  mzSample *sample = new mzSample();
+  string filename = sample_file.get_cstring();
+  sample->loadSample(filename.c_str());
+  String sample_basename = Rcpp::Language("basename", sample_file).eval();
+
+  vector<Scan*> scans(sample->scans.begin(), sample->scans.end());
+
+  DataFrame output = maldesi_search_internal(scans, library, search_params, sample_basename, verbose, debug);
+
+  //clean up (also deletes the Scan*s referenced by `scans`)
+  delete(sample);
+
+  return output;
+}
+
+// [[Rcpp::export]]
+DataFrame maldesi_search_df(
+    const DataFrame& scans_data,
+    const DataFrame& library,
+    const List& search_params,
+    const bool& verbose=true,
+    const bool& debug=false) {
+
+  //guard against improperly formatted input
+  if (!scans_data.containsElementNamed("scan_num")) {
+    return DataFrame::create(
+        Named("Error") = StringVector("scan_num column not provided."),
+        _["stringsAsFactors"] = false);
+  }
+
+  if (!scans_data.containsElementNamed("scan_data")) {
+    return DataFrame::create(
+        Named("Error") = StringVector("scan_data column not provided."),
+        _["stringsAsFactors"] = false);
+  }
+
+  IntegerVector scan_num_vector = scans_data["scan_num"];
+  List scan_data_vector = scans_data["scan_data"];
+
+  vector<Scan*> scans{};
+  scans.reserve(scan_num_vector.size());
+
+  for (unsigned int i = 0; i < (unsigned int)scan_num_vector.size(); i++) {
+
+    int scanNum = scan_num_vector[i];
+    List scanData = scan_data_vector[i];
+
+    NumericVector mzVec = scanData["mz"];
+    NumericVector intensityVec = scanData["intensity"];
+
+    //MAVEN scan num (scannum) is 0-indexed; scan_num column is assumed 1-indexed, matching the rest of the package's convention.
+    //Everything other than scannum/mz/intensity is stubbed to defaults, since this data does not originate from an mzSample.
+    Scan *scan = new Scan(nullptr, scanNum-1, 1, 0.0f, 0.0f, 0);
+    scan->mz = vector<float>(mzVec.begin(), mzVec.end());
+    scan->intensity = vector<float>(intensityVec.begin(), intensityVec.end());
+
+    scans.push_back(scan);
+  }
+
+  DataFrame output = maldesi_search_internal(scans, library, search_params, "", verbose, debug);
+
+  //clean up: these Scan*s are not owned by an mzSample, so they must be deleted directly.
+  for (unsigned int i = 0; i < scans.size(); i++) {
+    delete(scans[i]);
+  }
 
   return output;
 }

@@ -101,6 +101,10 @@ maldesi_search <- function(sample_file, library, search_params, verbose = TRUE, 
     .Call(`_mzkitcpp_maldesi_search`, sample_file, library, search_params, verbose, debug)
 }
 
+maldesi_search_df <- function(scans_data, library, search_params, verbose = TRUE, debug = FALSE) {
+    .Call(`_mzkitcpp_maldesi_search_df`, scans_data, library, search_params, verbose, debug)
+}
+
 maldesi_isotopic_envelope_finder <- function(sample_file, params, verbose = TRUE, debug = FALSE) {
     .Call(`_mzkitcpp_maldesi_isotopic_envelope_finder`, sample_file, params, verbose, debug)
 }
